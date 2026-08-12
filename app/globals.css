@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #e8edf2;
+  --foreground: #1a2330;
+  --paper: #f7f9fb;
+  --ink: #1a2330;
+  --muted: #64748b;
+  --line: #d5dde6;
+  --accent: #0f766e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-display);
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(1000px 520px at 0% -10%, #dfe9f4 0%, transparent 55%),
+    radial-gradient(800px 420px at 100% 0%, #d7ebe6 0%, transparent 45%),
+    var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Segoe UI", sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+/* TipTap / ProseMirror — Docs-like page typography */
+.tiptap-block .ProseMirror {
+  outline: none;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #1e293b;
+}
+
+.tiptap-block .ProseMirror p {
+  margin: 0;
+}
+
+.tiptap-block .ProseMirror p.is-editor-empty:first-child::before,
+.tiptap-block .ProseMirror .is-editor-empty::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap-block .ProseMirror ul {
+  list-style-type: disc;
+  list-style-position: outside;
+  margin: 0.15rem 0;
+  padding-left: 1.5rem;
+}
+
+.tiptap-block .ProseMirror ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+  margin: 0.15rem 0;
+  padding-left: 1.5rem;
+}
+
+.tiptap-block .ProseMirror li {
+  margin: 0.2rem 0;
+  padding-left: 0.15rem;
+}
+
+.tiptap-block .ProseMirror li p {
+  margin: 0;
+  display: inline;
+}
+
+.tiptap-block .ProseMirror li::marker {
+  color: #64748b;
+}
+
+.tiptap-block .ProseMirror strong {
+  font-weight: 700;
+}
+
+.tiptap-block .ProseMirror em {
+  font-style: italic;
+}
+
+.tiptap-block .ProseMirror u {
+  text-decoration: underline;
 }
