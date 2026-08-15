@@ -36,7 +36,7 @@ export function displayFolderName(name: string): string {
   return trimmed.length > 0 ? trimmed : "Untitled folder";
 }
 
-/** Blocks for a document, ordered by `position` (DB-friendly). */
+/** Blocks for a document, ordered by `position`. */
 export function getOrderedBlocks(
   snapshot: WorkspaceSnapshot,
   documentId: string,

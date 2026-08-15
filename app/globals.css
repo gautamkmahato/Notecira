@@ -1,92 +1,490 @@
 @import "tailwindcss";
 
-:root {
-  --background: #e8edf2;
-  --foreground: #1a2330;
-  --paper: #f7f9fb;
-  --ink: #1a2330;
-  --muted: #64748b;
-  --line: #d5dde6;
-  --accent: #0f766e;
-}
+/* ============================================
+ * Design Tokens — Notion (from public/final-design.md)
+ * Registered via @theme inline so Tailwind v4 and
+ * var(--token) usages both resolve from :root.
+ * ============================================ */
 
 @theme inline {
+  /* ── Core: Colors ── */
+  --color-dark-gray: #5f5e59;
+  --color-dark-gray-2: #2c2c2b;
+  --color-black: #000000;
+  --color-mid-gray: #8e8b86;
+  --color-mid-gray-2: #7d7a75;
+  --color-mid-gray-3: #a19e99;
+  --color-mid-gray-4: #ada9a3;
+  --color-mid-gray-5: #91918e;
+  --color-mid-gray-6: #e6e6e6;
+  --color-dark-gray-3: #383836;
+  --color-white: #ffffff;
+  --color-light-gray: #bcbab6;
+  --color-dark-orange: rgba(42, 28, 0, 0.07);
+  --color-white-2: #f9f8f7;
+  --color-blue: #2783de;
+  --color-dark-gray-4: rgba(25, 25, 25, 0.05);
+  --color-dark-red: rgba(33, 27, 23, 0.05);
+  --color-light-gray-2: #f0efed;
+
+  /* Tints for borders/rings — don't use /opacity on var() in Tailwind */
+  --color-blue-5: color-mix(in srgb, #2783de 5%, transparent);
+  --color-blue-25: color-mix(in srgb, #2783de 25%, transparent);
+  --color-blue-30: color-mix(in srgb, #2783de 30%, transparent);
+  --color-blue-40: color-mix(in srgb, #2783de 40%, transparent);
+
+  /* Semantic aliases used by the app */
+  --notion-hover: rgba(55, 53, 47, 0.08);
+  --notion-hover-strong: rgba(55, 53, 47, 0.12);
+  --notion-selected: rgba(55, 53, 47, 0.08);
+  --notion-danger: #cd3c3a;
+  --notion-danger-bg: rgba(205, 60, 58, 0.08);
+
+  /* ── Core: Typography ── */
+  --font-size-2xs: 11px;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-lg: 14px;
+  --font-size-xl: 16px;
+  --font-size-h1: 40px;
+  --font-family-base: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  --font-family-2: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Helvetica, Arial, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --line-height-tight: 12px;
+  --line-height-snug: 13.431px;
+  --line-height-normal: 14.4px;
+  --line-height-relaxed: 16.8px;
+  --line-height-loose: 18px;
+  --line-height-lh-6: 20px;
+  --line-height-lh-7: 21px;
+  --line-height-lh-8: 24px;
+
+  /* ── Layout: Spacing ── */
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-3: 3px;
+  --space-4: 4px;
+  --space-5: 5px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-50: 50px;
+  --space-80: 80px;
+  --space-102: 102px;
+  --space-120: 120px;
+  --space-121: 121px;
+  --space-191: 191px;
+
+  /* ── Borders ── */
+  --border-width-hairline: 1px;
+  --border-width-thin: 2px;
+  --radius-sm: 0px 8px 8px 0px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* ── Surfaces: Shadows ── */
+  --shadow-sm: rgba(25, 25, 25, 0.027) 0px 8px 12px 0px,
+    rgba(25, 25, 25, 0.027) 0px 2px 6px 0px, rgba(42, 28, 0, 0.07) 0px 0px 0px 1px;
+  --shadow-md: rgba(25, 25, 25, 0.05) 0px 20px 24px 0px,
+    rgba(25, 25, 25, 0.027) 0px 5px 8px 0px, rgba(42, 28, 0, 0.07) 0px 0px 0px 1px;
+  --shadow-lg: rgb(240, 239, 237) -1px 0px 0px 0px inset;
+
+  /* ── Motion ── */
+  --duration-instant: 0.02s;
+  --duration-fast: 0.1s;
+  --duration-normal: 0.15s;
+  --duration-slow: 0.16s;
+  --duration-slower: 0.2s;
+  --duration-duration-6: 0.25s;
+  --duration-duration-7: 0.3s;
+  --duration-duration-8: 0.7s;
+  --easing-ease-in: ease-in;
+  --easing-ease-out: ease-out;
+  --easing-ease-in-out: ease-in-out;
+  --easing-linear: linear;
+
+  /* ── Layout: Z-Index ── */
+  --z-1: -1;
+  --z-2: 1;
+  --z-3: 2;
+  --z-4: 4;
+  --z-5: 9;
+  --z-6: 85;
+  --z-7: 89;
+  --z-8: 99;
+  --z-9: 100;
+  --z-10: 101;
+  --z-11: 109;
+  --z-12: 111;
+  --z-13: 999;
+  --z-14: 1000;
+  --z-15: 9999;
+
+  /* App aliases */
+  --background: var(--color-white-2);
+  --foreground: var(--color-dark-gray-2);
+  --paper: var(--color-white);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-serif: var(--font-display);
+  --font-sans: var(--font-family-base);
 }
 
 body {
-  background:
-    radial-gradient(1000px 520px at 0% -10%, #dfe9f4 0%, transparent 55%),
-    radial-gradient(800px 420px at 100% 0%, #d7ebe6 0%, transparent 45%),
-    var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), "Segoe UI", sans-serif;
+  background: var(--color-white-2);
+  color: var(--color-dark-gray-2);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-lh-7);
+  -webkit-font-smoothing: antialiased;
 }
 
 .font-serif {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-family-base);
 }
 
-/* TipTap / ProseMirror — Docs-like page typography */
-.tiptap-block .ProseMirror {
+/* Shared Notion UI primitives — visual only */
+.notion-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  height: 28px;
+  padding: 0 var(--space-8);
+  border-radius: var(--radius-xl);
+  border: none;
+  background: transparent;
+  color: var(--color-dark-gray);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-loose);
+  transition: background var(--duration-fast) var(--easing-ease-out);
+  cursor: pointer;
+}
+
+.notion-btn:hover {
+  background: var(--notion-hover);
+}
+
+.notion-btn-primary {
+  background: var(--color-dark-gray-2);
+  color: var(--color-white);
+}
+
+.notion-btn-primary:hover {
+  background: var(--color-dark-gray-3);
+}
+
+.notion-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-xl);
+  border: none;
+  background: transparent;
+  color: var(--color-mid-gray);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-ease-out),
+    color var(--duration-fast) var(--easing-ease-out);
+}
+
+.notion-icon-btn:hover {
+  background: var(--notion-hover);
+  color: var(--color-dark-gray-2);
+}
+
+.notion-menu {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-4) 0;
+  z-index: var(--z-14);
+}
+
+.notion-menu-item {
+  display: block;
+  width: 100%;
+  padding: var(--space-6) var(--space-12);
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  color: var(--color-dark-gray-2);
+  cursor: pointer;
+}
+
+.notion-menu-item:hover {
+  background: var(--notion-hover);
+}
+
+.notion-menu-item-danger {
+  color: var(--notion-danger);
+}
+
+.notion-menu-item-danger:hover {
+  background: var(--notion-danger-bg);
+}
+
+/* Rich text blocks — Notion-like document typography */
+.rich-text-block [contenteditable] {
   outline: none;
-  font-size: 15px;
-  line-height: 1.7;
-  color: #1e293b;
+  font-size: var(--font-size-xl);
+  line-height: 1.5;
+  color: var(--color-dark-gray-2);
+  font-family: var(--font-family-base);
 }
 
-.tiptap-block .ProseMirror p {
+.rich-text-block [contenteditable] p {
   margin: 0;
 }
 
-.tiptap-block .ProseMirror p.is-editor-empty:first-child::before,
-.tiptap-block .ProseMirror .is-editor-empty::before {
-  color: #94a3b8;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-
-.tiptap-block .ProseMirror ul {
-  list-style-type: disc;
-  list-style-position: outside;
-  margin: 0.15rem 0;
-  padding-left: 1.5rem;
-}
-
-.tiptap-block .ProseMirror ol {
-  list-style-type: decimal;
-  list-style-position: outside;
-  margin: 0.15rem 0;
-  padding-left: 1.5rem;
-}
-
-.tiptap-block .ProseMirror li {
-  margin: 0.2rem 0;
-  padding-left: 0.15rem;
-}
-
-.tiptap-block .ProseMirror li p {
-  margin: 0;
-  display: inline;
-}
-
-.tiptap-block .ProseMirror li::marker {
-  color: #64748b;
-}
-
-.tiptap-block .ProseMirror strong {
+.rich-text-block [contenteditable] strong {
   font-weight: 700;
 }
 
-.tiptap-block .ProseMirror em {
+.rich-text-block [contenteditable] em {
   font-style: italic;
 }
 
-.tiptap-block .ProseMirror u {
+.rich-text-block [contenteditable] u {
   text-decoration: underline;
+}
+
+.rich-text-block.list-disc [contenteditable],
+.rich-text-block.list-decimal [contenteditable] {
+  padding-left: 0.15rem;
+}
+
+.rich-text-block.list-disc [contenteditable]::marker,
+.rich-text-block.list-decimal [contenteditable]::marker {
+  color: var(--color-mid-gray);
+}
+
+/* ── Scrollbars (thin, visible on hover) ── */
+* {
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.scrollbar-custom:hover {
+  scrollbar-color: #d1d5db transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+}
+
+.scrollbar-custom:hover::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+.canvas-scroll-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--color-white) 60%, transparent);
+  color: var(--color-mid-gray);
+  box-shadow: none;
+  opacity: 0.35;
+  backdrop-filter: blur(4px);
+  transition:
+    opacity var(--duration-fast) ease,
+    background-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.canvas-scroll-btn:hover:not(:disabled) {
+  opacity: 1;
+  border-color: var(--color-mid-gray-6);
+  background: var(--color-white);
+  color: var(--color-dark-gray-2);
+  box-shadow: var(--shadow-md);
+}
+
+.canvas-scroll-btn:disabled {
+  opacity: 0.15;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── Code block (syntax highlight + editor) ── */
+.code-editor {
+  background: transparent !important;
+}
+
+.code-editor textarea,
+.code-editor pre {
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  outline: none !important;
+}
+
+.code-editor textarea {
+  caret-color: var(--color-blue);
+}
+
+.code-editor-wrap textarea,
+.code-editor-wrap pre {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+.code-editor-nowrap textarea,
+.code-editor-nowrap pre {
+  white-space: pre !important;
+}
+
+.code-block-dark .code-editor textarea,
+.code-block-dark .code-editor pre {
+  color: #e6e6e6 !important;
+}
+
+.code-block-light .code-editor textarea,
+.code-block-light .code-editor pre {
+  color: var(--color-dark-gray-2) !important;
+}
+
+.code-block-dark .token.comment,
+.code-block-dark .token.prolog,
+.code-block-dark .token.doctype,
+.code-block-dark .token.cdata {
+  color: #8292a2;
+}
+
+.code-block-dark .token.punctuation {
+  color: #f8f8f2;
+}
+
+.code-block-dark .token.property,
+.code-block-dark .token.tag,
+.code-block-dark .token.constant,
+.code-block-dark .token.symbol,
+.code-block-dark .token.deleted {
+  color: #f92672;
+}
+
+.code-block-dark .token.boolean,
+.code-block-dark .token.number {
+  color: #ae81ff;
+}
+
+.code-block-dark .token.selector,
+.code-block-dark .token.attr-name,
+.code-block-dark .token.string,
+.code-block-dark .token.char,
+.code-block-dark .token.builtin,
+.code-block-dark .token.inserted {
+  color: #a6e22e;
+}
+
+.code-block-dark .token.operator,
+.code-block-dark .token.entity,
+.code-block-dark .token.url,
+.code-block-dark .token.variable {
+  color: #f8f8f2;
+}
+
+.code-block-dark .token.atrule,
+.code-block-dark .token.attr-value,
+.code-block-dark .token.function,
+.code-block-dark .token.class-name {
+  color: #e6db74;
+}
+
+.code-block-dark .token.keyword {
+  color: #66d9ef;
+}
+
+.code-block-light .token.comment,
+.code-block-light .token.prolog,
+.code-block-light .token.doctype,
+.code-block-light .token.cdata {
+  color: #708090;
+}
+
+.code-block-light .token.punctuation {
+  color: #393a34;
+}
+
+.code-block-light .token.property,
+.code-block-light .token.tag,
+.code-block-light .token.boolean,
+.code-block-light .token.number,
+.code-block-light .token.constant,
+.code-block-light .token.symbol,
+.code-block-light .token.deleted {
+  color: #36acaa;
+}
+
+.code-block-light .token.selector,
+.code-block-light .token.attr-name,
+.code-block-light .token.string,
+.code-block-light .token.char,
+.code-block-light .token.builtin,
+.code-block-light .token.inserted {
+  color: #50a14f;
+}
+
+.code-block-light .token.operator,
+.code-block-light .token.entity,
+.code-block-light .token.url,
+.code-block-light .language-css .token.string,
+.code-block-light .style .token.string {
+  color: #393a34;
+}
+
+.code-block-light .token.atrule,
+.code-block-light .token.attr-value,
+.code-block-light .token.keyword {
+  color: #07a;
+}
+
+.code-block-light .token.function,
+.code-block-light .token.class-name {
+  color: #dd4a68;
 }

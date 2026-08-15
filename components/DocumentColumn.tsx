@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { Check, Maximize2, Minimize2, Pencil, X } from "lucide-react";
 import { useDocumentStore } from "@/lib/document-store";
 import {
   FIXED_COLUMN_WIDTH_PX,
@@ -48,6 +49,9 @@ export function DocumentColumn({
   const [isEditing, setIsEditing] = useState(false);
   const isSolo = layout === "focus" || (columnCount === 1 && layout === "equal");
   const isFixed = layout === "fixed";
+  const titleSizeClass =
+    columnCount === 1 ? "text-[32px]" : "text-[22px]";
+  const contentPad = columnCount > 1 ? "px-8" : "px-14";
   const canResize =
     Boolean(onResizeWidth) && !isFocused && columnCount > 1 && !isLast;
 
@@ -88,40 +92,35 @@ export function DocumentColumn({
   if (!document) {
     return (
       <section
-        className={`relative flex h-full flex-col border-r border-slate-200 bg-white px-4 py-5 ${
+        className={`relative flex h-full flex-col bg-[var(--color-white)] px-4 py-5 ${
           isFixed || layout === "focus" ? "shrink-0" : "min-w-0 flex-1"
         }`}
         style={columnStyle(layout, columnCount, widthPx, isSolo)}
       >
-        <p className="text-sm text-slate-500">This document is missing.</p>
+        <p className="text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">This document is missing.</p>
       </section>
     );
   }
 
   return (
     <section
-      className={`relative flex h-full flex-col border-slate-200/90 bg-[#f7f9fb] transition-[flex-basis,box-shadow,width] duration-300 ease-out ${
+      className={`relative flex h-full flex-col overflow-visible bg-[var(--color-white)] transition-[flex-basis,box-shadow,width] duration-[var(--duration-duration-7)] ease-[var(--easing-ease-out)] ${
         isFixed || layout === "focus" ? "shrink-0" : "min-w-[260px] flex-1"
       } ${
-        isSolo
-          ? "rounded-xl border shadow-sm"
-          : `border-r ${isLast ? "shadow-[inset_0_0_0_1px_rgba(15,118,110,0.18)]" : ""}`
+        isSolo 
+          ? ""
+          : isLast
+            ? "border border-[var(--color-mid-gray-6)] rounded-[var(--radius-2xl)]"
+            : "border border-[var(--color-mid-gray-6)] rounded-[var(--radius-2xl)]"
       }`}
       style={columnStyle(layout, columnCount, widthPx, isSolo)}
     >
-      <header className="flex items-start gap-2 border-b border-slate-200/80 px-4 py-3">
+      <header className={`flex items-start gap-2 py-3 ${contentPad}`}>
         <div className="min-w-0 flex-1">
-          <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
-            {isFocused
-              ? "Focused"
-              : columnIndex === 0
-                ? "Document"
-                : `Sub-document · L${columnIndex}`}
-          </p>
           <DocumentTitleInput
             docId={docId}
             readOnly={!isEditing}
-            className="w-full bg-transparent font-serif text-xl font-semibold tracking-tight text-slate-900 outline-none placeholder:text-slate-400 read-only:cursor-default"
+            className={`w-full bg-transparent font-bold leading-[1.2] tracking-tight text-[var(--color-dark-gray-2)] outline-none placeholder:text-[var(--color-mid-gray)] read-only:cursor-default ${titleSizeClass}`}
           />
         </div>
 
@@ -129,33 +128,28 @@ export function DocumentColumn({
           <button
             type="button"
             onClick={() => setIsEditing((v) => !v)}
-            className={`rounded px-2.5 py-1 text-xs font-medium transition ${
-              isEditing
-                ? "bg-slate-900 text-white hover:bg-slate-800"
-                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+            className={`notion-icon-btn ${
+              isEditing ? "bg-[var(--color-dark-gray-2)] text-[var(--color-white)] hover:bg-[var(--color-dark-gray-3)]" : ""
             }`}
             title={isEditing ? "Switch to read-only" : "Enable editing"}
+            aria-label={isEditing ? "Done editing" : "Edit document"}
           >
-            {isEditing ? "Done" : "Edit"}
+            {isEditing ? (
+              <Check size={16} strokeWidth={1.75} />
+            ) : (
+              <Pencil size={16} strokeWidth={1.75} />
+            )}
           </button>
 
           {canFocus && !isFocused ? (
             <button
               type="button"
               onClick={() => onEnterFocus(docId)}
-              className="rounded px-2 py-1 text-slate-400 transition hover:bg-slate-200/60 hover:text-slate-700"
+              className="notion-icon-btn"
               aria-label="Expand to full view"
               title="Full view"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-              >
-                <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" />
-              </svg>
+              <Maximize2 size={16} strokeWidth={1.75} />
             </button>
           ) : null}
 
@@ -163,19 +157,11 @@ export function DocumentColumn({
             <button
               type="button"
               onClick={onExitFocus}
-              className="rounded px-2 py-1 text-slate-400 transition hover:bg-slate-200/60 hover:text-slate-700"
+              className="notion-icon-btn"
               aria-label="Exit full view"
               title="Exit full view"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-              >
-                <path d="M9 3v5H4M15 3v5h5M9 21v-5H4M15 21v-5h5" />
-              </svg>
+              <Minimize2 size={16} strokeWidth={1.75} />
             </button>
           ) : null}
 
@@ -183,20 +169,22 @@ export function DocumentColumn({
             <button
               type="button"
               onClick={() => onCloseFrom(columnIndex)}
-              className="rounded px-2 py-1 text-sm text-slate-400 transition hover:bg-slate-200/60 hover:text-slate-700"
+              className="notion-icon-btn"
               aria-label="Close this and deeper documents"
               title="Close"
             >
-              ✕
+              <X size={16} strokeWidth={1.75} />
             </button>
           ) : null}
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-visible">
         <BlockEditor
           docId={docId}
           columnIndex={columnIndex}
+          columnCount={columnCount}
+          contentPad={contentPad}
           editable={isEditing}
           openLinkedDocId={isFocused ? undefined : openLinkedDocId}
           onOpenLinked={onOpenLinked}
@@ -209,7 +197,7 @@ export function DocumentColumn({
           aria-orientation="vertical"
           aria-label="Resize column"
           onMouseDown={handleResizeStart}
-          className="absolute inset-y-0 right-0 z-10 w-1.5 cursor-col-resize bg-transparent transition hover:bg-teal-500/30"
+          className="absolute inset-y-0 right-0 z-[var(--z-5)] w-1.5 cursor-col-resize bg-transparent transition-colors hover:bg-[var(--color-dark-orange)]"
         />
       ) : null}
     </section>

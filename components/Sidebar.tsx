@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  ChevronRight,
+  FileText,
+  Folder,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+} from "lucide-react";
 import { displayTitle, useDocumentStore } from "@/lib/document-store";
 import type { SidebarDocNode, SidebarFolderNode } from "@/lib/domain/types";
 import { DocumentTitleInput } from "./DocumentTitleInput";
@@ -15,30 +23,14 @@ type SidebarProps = {
 
 function Chevron({ open }: { open: boolean }) {
   return (
-    <span
-      className={`inline-block text-[10px] text-slate-500 transition-transform duration-150 ${
+    <ChevronRight
+      size={14}
+      strokeWidth={1.75}
+      className={`text-[var(--color-mid-gray)] transition-transform duration-[var(--duration-fast)] ${
         open ? "rotate-90" : ""
       }`}
       aria-hidden
-    >
-      ▶
-    </span>
-  );
-}
-
-function DocIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-3.5 w-3.5 text-slate-400"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      aria-hidden
-    >
-      <path d="M7 4h7l3 3v13H7z" />
-      <path d="M14 4v4h4" />
-    </svg>
+    />
   );
 }
 
@@ -73,7 +65,7 @@ function DocActionsMenu({
   return (
     <div
       ref={ref}
-      className="absolute right-0 top-full z-30 mt-1 min-w-[140px] rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+      className="notion-menu absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[140px]"
       role="menu"
     >
       <button
@@ -83,7 +75,7 @@ function DocActionsMenu({
           onDelete();
           onClose();
         }}
-        className="block w-full px-3 py-2 text-left text-xs text-rose-600 hover:bg-rose-50"
+        className="notion-menu-item notion-menu-item-danger"
       >
         Delete
       </button>
@@ -126,10 +118,10 @@ function DocRow({
   return (
     <div>
       <div
-        className={`group/doc relative flex items-center gap-1 rounded-md pr-1 transition-colors ${
+        className={`group/doc relative flex items-center gap-1 rounded-[var(--radius-xl)] pr-1 transition-colors duration-[var(--duration-fast)] ${
           isActive
-            ? "bg-teal-50 text-teal-900"
-            : "text-slate-700 hover:bg-slate-100/90"
+            ? "bg-[var(--notion-selected)] text-[var(--color-dark-gray-2)]"
+            : "text-[var(--color-dark-gray)] hover:bg-[var(--notion-hover)]"
         }`}
         style={{ paddingLeft: `${6 + node.depth * 12}px` }}
       >
@@ -138,7 +130,7 @@ function DocRow({
             docId={node.documentId}
             autoFocus
             onRenameDone={() => setRenaming(false)}
-            className="my-0.5 min-w-0 flex-1 rounded border border-teal-200 bg-white px-2 py-1 text-sm outline-none"
+            className="my-0.5 min-w-0 flex-1 rounded-[var(--radius-lg)] bg-[var(--color-white)] px-2 py-1 text-sm outline-none shadow-[var(--shadow-sm)]"
           />
         ) : (
           <>
@@ -150,13 +142,17 @@ function DocRow({
                     : "opacity-100 group-hover/doc:opacity-0"
                 }`}
               >
-                <DocIcon />
+                <FileText
+                  size={14}
+                  strokeWidth={1.75}
+                  className="text-[var(--color-mid-gray)]"
+                />
               </span>
               {hasChildren ? (
                 <button
                   type="button"
                   onClick={() => toggleDoc(node.documentId)}
-                  className={`absolute inset-0 flex items-center justify-center rounded transition-opacity hover:bg-white/70 ${
+                  className={`absolute inset-0 flex items-center justify-center rounded-[var(--radius-lg)] transition-opacity hover:bg-[var(--notion-hover)] ${
                     menuOpen
                       ? "pointer-events-auto opacity-100"
                       : "pointer-events-none opacity-0 group-hover/doc:pointer-events-auto group-hover/doc:opacity-100"
@@ -189,24 +185,18 @@ function DocRow({
                 onClick={() => setRenaming(true)}
                 title="Rename"
                 aria-label={`Rename ${node.title}`}
-                className="rounded p-1 text-slate-400 hover:bg-white/80 hover:text-slate-700"
+                className="notion-icon-btn"
               >
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.75">
-                  <path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4Z" />
-                </svg>
+                <Pencil size={14} strokeWidth={1.75} />
               </button>
               <button
                 type="button"
                 onClick={() => setMenuOpen((open) => !open)}
                 title="More options"
                 aria-label={`More options for ${node.title}`}
-                className="rounded p-1 text-slate-400 hover:bg-white/80 hover:text-slate-700"
+                className="notion-icon-btn"
               >
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
-                  <circle cx="5" cy="12" r="1.5" />
-                  <circle cx="12" cy="12" r="1.5" />
-                  <circle cx="19" cy="12" r="1.5" />
-                </svg>
+                <MoreHorizontal size={14} strokeWidth={1.75} />
               </button>
               {menuOpen ? (
                 <DocActionsMenu
@@ -295,7 +285,7 @@ function FolderRow({
   return (
     <div>
       <div
-        className="group/folder relative flex items-center gap-1 rounded-md pr-1 text-slate-800 hover:bg-slate-100/90"
+        className="group/folder relative flex items-center gap-1 rounded-[var(--radius-xl)] pr-1 text-[var(--color-dark-gray)] hover:bg-[var(--notion-hover)]"
         style={{ paddingLeft: `${6 + node.depth * 12}px` }}
       >
         {renaming ? (
@@ -303,7 +293,7 @@ function FolderRow({
             folderId={node.folderId}
             autoFocus
             onRenameDone={() => setRenaming(false)}
-            className="my-0.5 min-w-0 flex-1 rounded border border-teal-200 bg-white px-2 py-1 text-sm outline-none"
+            className="my-0.5 min-w-0 flex-1 rounded-[var(--radius-lg)] bg-[var(--color-white)] px-2 py-1 text-sm outline-none shadow-[var(--shadow-sm)]"
           />
         ) : (
           <>
@@ -315,12 +305,16 @@ function FolderRow({
                     : "opacity-100 group-hover/folder:opacity-0"
                 }`}
               >
-                <span className="inline-block h-2.5 w-2.5 rounded-[2px] border border-slate-400/80 bg-slate-200/80" />
+                <Folder
+                  size={14}
+                  strokeWidth={1.75}
+                  className="text-[var(--color-mid-gray)]"
+                />
               </span>
               <button
                 type="button"
                 onClick={() => toggleFolder(node.folderId)}
-                className={`absolute inset-0 flex items-center justify-center rounded transition-opacity hover:bg-white/70 ${
+                className={`absolute inset-0 flex items-center justify-center rounded-[var(--radius-lg)] transition-opacity hover:bg-[var(--notion-hover)] ${
                   menuOpen
                     ? "pointer-events-auto opacity-100"
                     : "pointer-events-none opacity-0 group-hover/folder:pointer-events-auto group-hover/folder:opacity-100"
@@ -353,34 +347,28 @@ function FolderRow({
                 onClick={() => setRenaming(true)}
                 title="Rename"
                 aria-label={`Rename ${node.name}`}
-                className="rounded p-1 text-slate-400 hover:bg-white/80 hover:text-slate-700"
+                className="notion-icon-btn"
               >
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.75">
-                  <path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4Z" />
-                </svg>
+                <Pencil size={14} strokeWidth={1.75} />
               </button>
               <button
                 type="button"
                 onClick={() => setMenuOpen((open) => !open)}
                 title="More options"
                 aria-label={`More options for ${node.name}`}
-                className="rounded p-1 text-slate-400 hover:bg-white/80 hover:text-slate-700"
+                className="notion-icon-btn"
               >
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
-                  <circle cx="5" cy="12" r="1.5" />
-                  <circle cx="12" cy="12" r="1.5" />
-                  <circle cx="19" cy="12" r="1.5" />
-                </svg>
+                <MoreHorizontal size={14} strokeWidth={1.75} />
               </button>
               {menuOpen ? (
-                <div className="absolute right-0 top-full z-30 mt-1 min-w-[150px] rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                <div className="notion-menu absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[150px]">
                   <button
                     type="button"
                     onClick={() => {
                       onCreateDocument(node.folderId);
                       setMenuOpen(false);
                     }}
-                    className="block w-full px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                    className="notion-menu-item"
                   >
                     New document
                   </button>
@@ -390,7 +378,7 @@ function FolderRow({
                       confirmDelete();
                       setMenuOpen(false);
                     }}
-                    className="block w-full px-3 py-2 text-left text-xs text-rose-600 hover:bg-rose-50"
+                    className="notion-menu-item notion-menu-item-danger"
                   >
                     Delete
                   </button>
@@ -428,7 +416,7 @@ function FolderRow({
           ))}
           {!hasContent ? (
             <p
-              className="py-1 text-[11px] text-slate-400"
+              className="py-1 text-xs text-gray-300"
               style={{ paddingLeft: `${22 + (node.depth + 1) * 12}px` }}
             >
               Empty folder
@@ -458,7 +446,27 @@ export function Sidebar({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     () => new Set(),
   );
+  const [newMenuOpen, setNewMenuOpen] = useState(false);
+  const newMenuRef = useRef<HTMLDivElement | null>(null);
   const foldersInitialized = useRef(false);
+
+  useEffect(() => {
+    if (!newMenuOpen) return;
+    const onPointer = (event: MouseEvent) => {
+      if (!newMenuRef.current?.contains(event.target as Node)) {
+        setNewMenuOpen(false);
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setNewMenuOpen(false);
+    };
+    window.addEventListener("mousedown", onPointer);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [newMenuOpen]);
 
   useEffect(() => {
     if (!hydrated || foldersInitialized.current) return;
@@ -517,44 +525,66 @@ export function Sidebar({
 
   return (
     <aside
-      className={`flex h-full shrink-0 flex-col border-r border-slate-200/90 bg-[#f4f7fa] transition-[width,opacity] duration-300 ease-out ${
+      className={`flex h-full shrink-0 flex-col bg-[var(--color-white-2)] transition-[width,opacity] duration-[var(--duration-duration-7)] ease-[var(--easing-ease-out)] ${
         open
-          ? "w-[280px] opacity-100"
-          : "w-0 overflow-hidden border-r-0 opacity-0"
+          ? "w-[280px] opacity-100 shadow-[var(--shadow-lg)]"
+          : "w-0 overflow-hidden opacity-0"
       }`}
       aria-hidden={!open}
     >
-      <div className="flex w-[280px] items-center justify-between gap-2 px-3 pb-2 pt-3">
-        <div className="min-w-0">
-          <p className="font-serif text-base tracking-tight text-slate-900">
-            Branch
-          </p>
-          <p className="truncate text-[11px] text-slate-500">Documents</p>
+      <div className="flex w-[280px] items-center justify-between gap-2 px-3 py-3">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <FileText size={16} strokeWidth={1.75} className="text-[var(--color-dark-gray)]" />
+          <p className="text-lg font-medium text-gray-700">Documents</p>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="relative shrink-0" ref={newMenuRef}>
           <button
             type="button"
-            onClick={handleCreateFolder}
-            className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-            title="New folder"
+            onClick={() => setNewMenuOpen((open) => !open)}
+            className="notion-btn notion-btn-primary inline-flex items-center gap-1"
+            aria-haspopup="menu"
+            aria-expanded={newMenuOpen}
           >
-            Folder
+            <Plus size={14} strokeWidth={1.75} className="text-white" />
+            <span className="text-[var(--font-size-2xs)] text-[var(--color-white)] pr-1">New</span>
           </button>
-          <button
-            type="button"
-            onClick={() => onCreateDocument(null)}
-            className="rounded-md bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700"
-          >
-            New
-          </button>
+          {newMenuOpen ? (
+            <div
+              className="notion-menu absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[150px]"
+              role="menu"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  handleCreateFolder();
+                  setNewMenuOpen(false);
+                }}
+                className="notion-menu-item"
+              >
+                New Folder
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onCreateDocument(null);
+                  setNewMenuOpen(false);
+                }}
+                className="notion-menu-item"
+              >
+                New Document
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
 
-      <div className="min-h-0 w-[280px] flex-1 overflow-y-auto px-2 pb-4">
+      <div className="scrollbar-custom min-h-0 w-[280px] flex-1 overflow-y-auto px-2 pb-4 border-t border-gray-200 mt-1 pt-4">
         {!hydrated ? (
-          <p className="px-2 py-2 text-xs text-slate-400">Loading…</p>
+          <p className="px-2 py-2 text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">Loading…</p>
         ) : isEmpty ? (
-          <p className="px-2 py-2 text-xs text-slate-400">No documents yet.</p>
+          <p className="px-2 py-2 text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">No documents yet.</p>
         ) : (
           <nav className="flex flex-col gap-0.5" aria-label="Documents">
             {sidebarForest.folders.map((folder) => (
@@ -573,7 +603,7 @@ export function Sidebar({
 
             {sidebarForest.folders.length > 0 &&
             sidebarForest.documents.length > 0 ? (
-              <p className="px-2 pb-1 pt-3 text-[10px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              <p className="px-2 pb-1 pt-3 text-xs font-medium uppercase tracking-[0.06em] text-[var(--color-mid-gray)] mt-8">
                 Unfiled
               </p>
             ) : null}
@@ -592,13 +622,13 @@ export function Sidebar({
         )}
       </div>
 
-      <div className="w-[280px] border-t border-slate-200/80 px-3 py-2 text-[11px] text-slate-400">
+      {/* <div className="w-[280px] px-3 py-2 text-[var(--font-size-2xs)] text-[var(--color-mid-gray)] shadow-[var(--shadow-lg)]">
         {activeTitle ? (
           <span className="block truncate">Open: {activeTitle}</span>
         ) : (
           "Select a page"
         )}
-      </div>
+      </div> */}
     </aside>
   );
 }

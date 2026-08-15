@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useMemo,
   useRef,
   type FormEvent,
   type KeyboardEvent,
@@ -12,6 +13,11 @@ import {
   getActiveTextEditor,
   registerActiveTextEditor,
 } from "@/lib/editor/rich-text/active-editor";
+import {
+  fromEditableHtml,
+  toEditableHtml,
+  type TextBlockMode,
+} from "@/lib/editor/rich-text/editor-html";
 import {
   ensureEditableHtml,
   htmlToPlainText,
@@ -25,47 +31,70 @@ import {
 
 type RichTextBlockProps = {
   block: Block;
+  mode?: TextBlockMode;
   placeholder?: string;
   className?: string;
+  editable?: boolean;
   autofocus?: boolean;
   caret?: number;
-  /** When true, Enter inserts a soft line break (used inside list items). */
-  softBreakOnEnter?: boolean;
   onFocused: () => void;
   onAutofocusHandled?: () => void;
   onRequestFocus: (blockId: string, caret?: number) => void;
   onSlashQueryChange?: (query: string | null) => void;
-  /** Optional override for Enter (e.g. list item split). Return true if handled. */
-  onEnter?: () => boolean;
-  /** Optional override for Backspace at start. Return true if handled. */
-  onBackspaceAtStart?: () => boolean;
-  /** Persist HTML somewhere other than block.content (list items). */
-  onHtmlChange?: (html: string) => void;
-  initialHtml?: string;
 };
 
 export function RichTextBlock({
   block,
+  mode = "text",
   placeholder = "Press '/' for commands",
   className = "",
+  editable = true,
   autofocus,
   caret,
-  softBreakOnEnter = false,
   onFocused,
   onAutofocusHandled,
   onRequestFocus,
   onSlashQueryChange,
-  onEnter,
-  onBackspaceAtStart,
-  onHtmlChange,
-  initialHtml,
 }: RichTextBlockProps) {
   const updateBlockContent = useDocumentStore((s) => s.updateBlockContent);
+  const updateBlockAttrs = useDocumentStore((s) => s.updateBlockAttrs);
+  const updateBlockType = useDocumentStore((s) => s.updateBlockType);
   const splitBlock = useDocumentStore((s) => s.splitBlock);
   const mergeWithPrevious = useDocumentStore((s) => s.mergeWithPrevious);
   const ref = useRef<HTMLDivElement | null>(null);
   const skipSync = useRef(false);
-  const sourceHtml = initialHtml ?? block.content;
+  const migrated = useRef(false);
+
+  const isList = mode === "bulletList" || mode === "orderedList";
+
+  const sourceHtml = useMemo(
+    () => toEditableHtml(block.content, mode, block.attrs),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [block.id, mode],
+  );
+
+  useEffect(() => {
+    if (migrated.current || !isList) return;
+    if (!Array.isArray(block.attrs.items) || block.attrs.items.length === 0) {
+      return;
+    }
+    migrated.current = true;
+    const html = fromEditableHtml(
+      toEditableHtml(block.content, mode, block.attrs),
+      mode,
+    );
+    skipSync.current = true;
+    updateBlockContent(block.id, html);
+    updateBlockAttrs(block.id, { items: undefined });
+  }, [
+    block.attrs.items,
+    block.content,
+    block.id,
+    isList,
+    mode,
+    updateBlockAttrs,
+    updateBlockContent,
+  ]);
 
   useEffect(() => {
     const el = ref.current;
@@ -83,7 +112,7 @@ export function RichTextBlock({
   }, [sourceHtml]);
 
   useEffect(() => {
-    if (!autofocus) return;
+    if (!autofocus || !editable) return;
     const el = ref.current;
     if (!el) return;
     el.focus();
@@ -92,57 +121,47 @@ export function RichTextBlock({
     } else {
       setCaretPlainOffset(el, htmlToPlainText(el.innerHTML).length);
     }
-    onAutofocusHandled?.();
-  }, [autofocus, caret, onAutofocusHandled]);
-
-  const notifyMarks = () => {
-    const el = ref.current;
-    if (!el) return;
     registerActiveTextEditor({
       blockId: block.id,
       root: el,
-      persist: () => {
-        const html = normalizeEmptyHtml(el.innerHTML);
-        skipSync.current = true;
-        if (onHtmlChange) {
-          onHtmlChange(html);
-        } else {
-          updateBlockContent(block.id, html);
-        }
-        el.dataset.empty = isEmptyHtml(html) ? "true" : "false";
-      },
-      notify: notifyMarks,
+      persist: () => persistFromEl(el),
+      notify: () => registerMarks(el),
     });
+    onAutofocusHandled?.();
+  }, [autofocus, caret, editable, block.id, onAutofocusHandled]);
+
+  const persistFromEl = (el: HTMLElement) => {
+    const inner = normalizeEmptyHtml(el.innerHTML);
+    skipSync.current = true;
+    updateBlockContent(
+      block.id,
+      isList ? fromEditableHtml(inner, mode) : inner,
+    );
+    el.dataset.empty = isEmptyHtml(inner) ? "true" : "false";
   };
 
-  const persistHtml = (html: string) => {
-    const normalized = normalizeEmptyHtml(html);
-    skipSync.current = true;
-    if (onHtmlChange) {
-      onHtmlChange(normalized);
-    } else {
-      updateBlockContent(block.id, normalized);
-    }
-    if (ref.current) {
-      ref.current.dataset.empty = isEmptyHtml(normalized) ? "true" : "false";
-    }
+  const registerMarks = (el: HTMLElement) => {
+    registerActiveTextEditor({
+      blockId: block.id,
+      root: el,
+      persist: () => persistFromEl(el),
+      notify: () => registerMarks(el),
+    });
   };
 
   const syncSlash = (html: string) => {
     if (!onSlashQueryChange) return;
     const plain = htmlToPlainText(html);
-    if (plain.startsWith("/")) {
-      onSlashQueryChange(plain.slice(1));
-    } else {
-      onSlashQueryChange(null);
-    }
+    if (plain.startsWith("/")) onSlashQueryChange(plain.slice(1));
+    else onSlashQueryChange(null);
   };
 
   const onInput = (event: FormEvent<HTMLDivElement>) => {
+    if (!editable) return;
     const html = event.currentTarget.innerHTML;
-    persistHtml(html);
+    persistFromEl(event.currentTarget);
     syncSlash(html);
-    notifyMarks();
+    registerMarks(event.currentTarget);
   };
 
   const caretAtStart = (el: HTMLElement): boolean => {
@@ -155,33 +174,46 @@ export function RichTextBlock({
     return pre.toString().length === 0;
   };
 
+  const exitListToParagraph = () => {
+    updateBlockType(block.id, "paragraph");
+    updateBlockContent(block.id, "");
+    updateBlockAttrs(block.id, { items: undefined });
+    onSlashQueryChange?.(null);
+    onRequestFocus(block.id, 0);
+  };
+
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!editable) return;
     const el = event.currentTarget;
 
     if (event.key === "Enter" && !event.shiftKey) {
-      if (softBreakOnEnter) return;
       event.preventDefault();
 
-      if (onEnter?.()) {
-        onSlashQueryChange?.(null);
+      if (isList && isEmptyHtml(el.innerHTML)) {
+        exitListToParagraph();
         return;
       }
 
       const { before, after } = splitHtmlAtCaret(el);
-      const newId = splitBlock(block.documentId, block.id, before, after);
+      const storedBefore = isList ? fromEditableHtml(before, mode) : before;
+      const storedAfter = isList ? fromEditableHtml(after, mode) : after;
+      const newId = splitBlock(
+        block.documentId,
+        block.id,
+        storedBefore,
+        storedAfter,
+      );
       onSlashQueryChange?.(null);
       onRequestFocus(newId, 0);
       return;
     }
 
     if (event.key === "Backspace" && caretAtStart(el)) {
-      if (onBackspaceAtStart?.()) {
+      if (isList && isEmptyHtml(el.innerHTML)) {
         event.preventDefault();
-        onSlashQueryChange?.(null);
+        exitListToParagraph();
         return;
       }
-
-      if (onHtmlChange) return;
 
       const merged = mergeWithPrevious(block.documentId, block.id);
       if (!merged) return;
@@ -191,29 +223,38 @@ export function RichTextBlock({
     }
   };
 
+  const listClass =
+    mode === "orderedList"
+      ? "list-decimal"
+      : mode === "bulletList"
+        ? "list-disc"
+        : "";
+
   return (
-    <div
-      ref={ref}
-      role="textbox"
-      aria-multiline="true"
-      contentEditable
-      suppressContentEditableWarning
-      data-placeholder={placeholder}
-      data-empty={isEmptyHtml(sourceHtml) ? "true" : "false"}
-      onFocus={() => {
-        onFocused();
-        notifyMarks();
-      }}
-      onBlur={() => {
-        if (getActiveTextEditor()?.blockId === block.id) {
-          registerActiveTextEditor(null);
-        }
-      }}
-      onMouseUp={notifyMarks}
-      onKeyUp={notifyMarks}
-      onInput={onInput}
-      onKeyDown={onKeyDown}
-      className={`rich-text-block block w-full leading-7 text-slate-800 outline-none data-[empty=true]:before:pointer-events-none data-[empty=true]:before:text-slate-400 data-[empty=true]:before:content-[attr(data-placeholder)] ${className}`}
-    />
+    <div className={`rich-text-block w-full ${isList ? "ml-6" : ""}`} data-mode={mode}>
+      <div
+        ref={ref}
+        role="textbox"
+        aria-multiline="true"
+        contentEditable={editable}
+        suppressContentEditableWarning
+        data-placeholder={placeholder}
+        data-empty={isEmptyHtml(sourceHtml) ? "true" : "false"}
+        onFocus={() => {
+          onFocused();
+          if (ref.current) registerMarks(ref.current);
+        }}
+        onBlur={() => {
+          if (getActiveTextEditor()?.blockId === block.id) {
+            registerActiveTextEditor(null);
+          }
+        }}
+        onMouseUp={() => ref.current && registerMarks(ref.current)}
+        onKeyUp={() => ref.current && registerMarks(ref.current)}
+        onInput={onInput}
+        onKeyDown={onKeyDown}
+        className={`block w-full leading-7 text-[var(--color-dark-gray-2)] outline-none data-[empty=true]:before:pointer-events-none data-[empty=true]:before:text-[var(--color-mid-gray)] data-[empty=true]:before:content-[attr(data-placeholder)] ${isList ? `list-item ${listClass}` : ""} ${className}`}
+      />
+    </div>
   );
 }

@@ -2,12 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDocumentStore } from "@/lib/document-store";
+import { useActiveBlockSelection } from "@/lib/editor/active-block";
 import {
   FIXED_COLUMN_WIDTH_PX,
   clampColumnWidth,
   isScrollColumnLayout,
 } from "@/lib/layout";
 import { DocumentColumn } from "./DocumentColumn";
+import { CanvasScrollControls } from "./CanvasScrollControls";
+import { FormatToolbar } from "./editor/FormatToolbar";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -163,15 +166,21 @@ export function Workspace() {
     }));
   }, []);
 
+  const activeBlock = useActiveBlockSelection();
+
   if (!hydrated) {
     return (
-      <div className="flex flex-1 items-center justify-center text-sm text-slate-500">
+      <div className="flex flex-1 items-center justify-center text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">
         Loading workspace…
       </div>
     );
   }
 
   const activeDocId = path[path.length - 1] ?? null;
+  const toolbarBlockId =
+    activeBlock?.docId && path.includes(activeBlock.docId)
+      ? activeBlock.blockId
+      : null;
   const layout = isFocused ? "focus" : scrollLayout ? "fixed" : "equal";
   const canFocus = path.length > 1;
   const focusedIndex = focusDocId ? path.indexOf(focusDocId) : -1;
@@ -185,36 +194,45 @@ export function Workspace() {
         onCreateDocument={handleCreateDocument}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <Topbar
           path={path}
+          activeDocId={activeDocId}
           sidebarOpen={sidebarOpen}
           onToggleSidebar={toggleSidebar}
           onSelectPathIndex={selectPathIndex}
-          onCreateDocument={() => handleCreateDocument(null)}
         />
 
-        <div
-          ref={scrollBoardRef}
-          className="relative min-h-0 flex-1 overflow-x-auto overflow-y-hidden"
-        >
+        {path.length > 0 ? (
+          <FormatToolbar blockId={toolbarBlockId} />
+        ) : null}
+
+        <div className="relative min-h-0 flex-1 overflow-hidden">
+          <CanvasScrollControls
+            scrollRef={scrollBoardRef}
+            enabled={path.length > 1 && !isFocused}
+          />
+          <div
+            ref={scrollBoardRef}
+            className="scrollbar-custom h-full overflow-x-auto overflow-y-hidden bg-[var(--color-white)]"
+          >
           {path.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-              <p className="font-serif text-xl text-slate-800">No documents yet</p>
-              <p className="max-w-sm text-sm text-slate-500">
+              <p className="text-[var(--font-size-xl)] font-medium text-[var(--color-dark-gray-2)]">No documents yet</p>
+              <p className="max-w-sm text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">
                 Create a document to start writing. Link any block to open a
                 sub-document beside it.
               </p>
               <button
                 type="button"
                 onClick={() => handleCreateDocument(null)}
-                className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
+                className="notion-btn notion-btn-primary"
               >
                 Create document
               </button>
             </div>
           ) : isFocused && focusDocId ? (
-            <div className="flex h-full w-full justify-center px-3 py-3 sm:px-5">
+            <div className="flex gap-4 h-full w-full justify-center px-3 py-3 sm:px-5">
               <DocumentColumn
                 key={`focus-${focusDocId}`}
                 docId={focusDocId}
@@ -234,7 +252,7 @@ export function Workspace() {
               />
             </div>
           ) : scrollLayout ? (
-            <div className="flex h-full min-h-0 w-max">
+            <div className="flex gap-4 h-full min-h-0 w-max ml-4 mt-8">
               {path.map((docId, index) => (
                 <DocumentColumn
                   key={`${docId}-${index}`}
@@ -254,14 +272,14 @@ export function Workspace() {
                   onResizeWidth={resizeColumn}
                 />
               ))}
-            </div>
+            </div> 
           ) : (
-            <div className="flex h-full w-full justify-center px-3 py-3 sm:px-5">
+            <div className="flex h-full w-full justify-center px-3 py-3 sm:px-5 mt-8">
               <div
-                className="flex h-full min-h-0"
+                className="flex gap-4 h-full min-h-0"
                 style={{
                   width:
-                    columnCount === 1 ? "min(720px, 100%)" : "min(100%, 1400px)",
+                    columnCount === 1 ? "min(820px, 100%)" : "min(100%, 1400px)",
                   maxWidth: "100%",
                 }}
               >
@@ -289,6 +307,7 @@ export function Workspace() {
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

@@ -46,7 +46,7 @@ export function SlashCommandMenu({
     return (
       <div
         ref={ref}
-        className="absolute left-8 top-full z-30 mt-1 w-56 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-400 shadow-lg"
+        className="notion-menu absolute left-8 top-full z-[var(--z-14)] mt-1 w-56 px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-mid-gray)]"
       >
         No matching blocks
       </div>
@@ -56,11 +56,11 @@ export function SlashCommandMenu({
   return (
     <div
       ref={ref}
-      className="absolute left-8 top-full z-30 mt-1 max-h-64 w-56 overflow-y-auto rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+      className="notion-menu scrollbar-custom absolute left-8 top-full z-[var(--z-14)] mt-1 max-h-64 w-56 overflow-y-auto"
       role="listbox"
       aria-label="Insert block"
     >
-      <p className="px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+      <p className="px-3 py-1 text-[var(--font-size-2xs)] font-medium uppercase tracking-wide text-[var(--color-mid-gray)]">
         Basic blocks
       </p>
       {filtered.map((type) => (
@@ -70,7 +70,7 @@ export function SlashCommandMenu({
           role="option"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onSelect(type)}
-          className="block w-full px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+          className="notion-menu-item"
         >
           {BLOCK_TYPE_LABELS[type]}
         </button>

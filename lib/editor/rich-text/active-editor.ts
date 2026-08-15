@@ -1,11 +1,15 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { BlockAttrs } from "@/lib/domain/types";
+import {
+  clampFontSizePx,
+  DEFAULT_FONT_SIZE_PX,
+  parseFontSizePx,
+} from "./font-size";
+import { DEFAULT_FONT_FAMILY } from "./font-family";
 import {
   applyInlineCommand,
   emptyInlineState,
-  FONT_SIZE_PX,
   queryInlineState,
   type InlineMarkState,
 } from "./marks";
@@ -13,7 +17,6 @@ import {
 export type ActiveTextEditorHandle = {
   blockId: string;
   root: HTMLElement;
-  /** Persist current HTML to the correct store field (content or list item). */
   persist: () => void;
   notify: () => void;
 };
@@ -57,7 +60,7 @@ export function useInlineMarkState(blockId: string | null): InlineMarkState {
   if (!active || !blockId || active.blockId !== blockId) {
     return emptyInlineState();
   }
-  return queryInlineState();
+  return queryInlineState(active.root);
 }
 
 export type InlineFormatApi = {
@@ -67,14 +70,13 @@ export type InlineFormatApi = {
   toggleItalic: () => void;
   toggleUnderline: () => void;
   setColor: (color: string) => void;
-  setFontSize: (size: NonNullable<BlockAttrs["fontSize"]>) => void;
+  setFontFamily: (fontFamily: string) => void;
+  setFontSizePx: (px: number) => void;
 };
 
-export function buildInlineFormatApi(
-  blockId: string | null,
-  state: InlineMarkState,
-): InlineFormatApi {
+export function buildInlineFormatApi(blockId: string | null): InlineFormatApi {
   const available = Boolean(active && blockId && active.blockId === blockId);
+  const state = available ? queryInlineState(active!.root) : emptyInlineState();
 
   const run = (fn: () => void) => {
     const current = getActiveTextEditor();
@@ -98,13 +100,36 @@ export function buildInlineFormatApi(
       run(() =>
         applyInlineCommand(getActiveTextEditor()!.root, "foreColor", color),
       ),
-    setFontSize: (size) =>
+    setFontFamily: (fontFamily) =>
+      run(() =>
+        applyInlineCommand(getActiveTextEditor()!.root, "fontFamily", fontFamily),
+      ),
+    setFontSizePx: (px) =>
       run(() =>
         applyInlineCommand(
           getActiveTextEditor()!.root,
           "fontSize",
-          FONT_SIZE_PX[size],
+          `${clampFontSizePx(px)}px`,
         ),
       ),
   };
 }
+
+export function emptyInlineFormatApi(): InlineFormatApi {
+  return {
+    available: false,
+    state: emptyInlineState(),
+    toggleBold: () => {},
+    toggleItalic: () => {},
+    toggleUnderline: () => {},
+    setColor: () => {},
+    setFontFamily: () => {},
+    setFontSizePx: () => {},
+  };
+}
+
+export function notifyInlineToolbar() {
+  emit();
+}
+
+export { DEFAULT_FONT_SIZE_PX, DEFAULT_FONT_FAMILY, parseFontSizePx };

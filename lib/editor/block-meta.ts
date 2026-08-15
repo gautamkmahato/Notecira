@@ -3,7 +3,7 @@ import type { Block, BlockAttrs, BlockType } from "@/lib/domain/types";
 import { defaultAttrsForType, isTextLikeBlockType } from "@/lib/domain/types";
 import { ensureListItems, listItemsPlainText } from "@/lib/editor/list-attrs";
 import { htmlToPlainText } from "@/lib/editor/rich-text/html";
-import { toEditorHtml } from "@/lib/editor/tiptap/html";
+import { toEditorHtml } from "@/lib/editor/rich-text/editor-html";
 
 export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   paragraph: "Text",

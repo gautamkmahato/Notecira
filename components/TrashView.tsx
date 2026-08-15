@@ -24,7 +24,7 @@ export function TrashView() {
 
   if (!hydrated) {
     return (
-      <div className="flex flex-1 items-center justify-center text-sm text-slate-500">
+      <div className="flex flex-1 items-center justify-center text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">
         Loading trash…
       </div>
     );
@@ -32,30 +32,30 @@ export function TrashView() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <header className="border-b border-slate-200/80 bg-white/75 px-6 py-5 backdrop-blur-sm">
-        <h1 className="font-serif text-2xl tracking-tight text-slate-900">
+      <header className="bg-[var(--color-white)] px-6 py-5 shadow-[var(--shadow-lg)]">
+        <h1 className="text-[var(--font-size-xl)] font-medium tracking-tight text-[var(--color-dark-gray-2)]">
           Trash
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">
           Deleted documents and sub-documents. Restore or delete permanently.
         </p>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+      <div className="scrollbar-custom min-h-0 flex-1 overflow-y-auto px-6 py-5">
         {trashedDocuments.length === 0 ? (
-          <p className="text-sm text-slate-500">Trash is empty.</p>
+          <p className="text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">Trash is empty.</p>
         ) : (
           <ul className="flex max-w-3xl flex-col gap-2">
             {trashedDocuments.map(({ document, parentTitle }) => (
               <li
                 key={document.id}
-                className="flex items-center justify-between gap-4 rounded-lg border border-slate-200/90 bg-white px-4 py-3"
+                className="flex items-center justify-between gap-4 rounded-[var(--radius-xl)] bg-[var(--color-white)] px-4 py-3 shadow-[var(--shadow-sm)]"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-slate-900">
+                  <p className="truncate font-medium text-[var(--color-dark-gray-2)]">
                     {displayTitle(document.title)}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-[var(--font-size-2xs)] text-[var(--color-mid-gray)]">
                     {parentTitle
                       ? `Sub-document of “${parentTitle}”`
                       : "Root document"}
@@ -67,7 +67,7 @@ export function TrashView() {
                   <button
                     type="button"
                     onClick={() => restoreDocument(document.id)}
-                    className="rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                    className="notion-btn"
                   >
                     Restore
                   </button>
@@ -82,7 +82,7 @@ export function TrashView() {
                         permanentlyDeleteDocument(document.id);
                       }
                     }}
-                    className="rounded-md border border-rose-200 px-2.5 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
+                    className="notion-btn text-[var(--notion-danger)] hover:bg-[var(--notion-danger-bg)]"
                   >
                     Delete forever
                   </button>

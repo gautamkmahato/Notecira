@@ -2,9 +2,9 @@
 
 import { useEffect, type ReactNode } from "react";
 import { create } from "zustand";
+import { apiWorkspaceRepository } from "@/lib/data/api-repository";
 import {
   createEmptyWorkspace,
-  localWorkspaceRepository,
 } from "@/lib/data/local-repository";
 import type { WorkspaceRepository } from "@/lib/data/repository";
 import {
@@ -113,6 +113,14 @@ function applyBlockUpdates(
   return { ...snapshot, blocks };
 }
 
+function cloneBlockAttrs(attrs: Block["attrs"]): Block["attrs"] {
+  return {
+    ...attrs,
+    items: attrs.items ? [...attrs.items] : attrs.items,
+    cells: attrs.cells ? attrs.cells.map((row) => [...row]) : attrs.cells,
+  };
+}
+
 function withDerived(snapshot: WorkspaceSnapshot) {
   return {
     snapshot,
@@ -147,7 +155,7 @@ export const useDocumentStore = create<DocumentStoreState>((set, get) => ({
     ),
   buildPathTo: (docId) => buildPathToDocument(get().snapshot, docId),
 
-  hydrate: async (repository = localWorkspaceRepository) => {
+  hydrate: async (repository = apiWorkspaceRepository) => {
     if (get().hydrated) return;
     const loaded = await repository.load();
     set({ ...withDerived(loaded), hydrated: true });
@@ -701,25 +709,25 @@ export const useDocumentStore = create<DocumentStoreState>((set, get) => ({
     const clone: Block = {
       ...block,
       id: newId,
-      // Duplicate content only — do not share linked sub-docs
       linkedDocumentId: null,
       createdAt: timestamp,
       updatedAt: timestamp,
-      attrs: {
-        ...block.attrs,
-        items: block.attrs.items ? [...block.attrs.items] : block.attrs.items,
-        cells: block.attrs.cells
-          ? block.attrs.cells.map((row) => [...row])
-          : block.attrs.cells,
-      },
+      attrs: cloneBlockAttrs(block.attrs),
     };
 
     const nextOrdered = [...ordered];
     nextOrdered.splice(index + 1, 0, clone);
-    const reindexed = reindexPositions(nextOrdered);
+    const reindexed = reindexPositions(
+      nextOrdered.map((item) =>
+        item.id === newId ? clone : { ...item, updatedAt: timestamp },
+      ),
+    );
+
+    let nextSnapshot = applyBlockUpdates(prev, reindexed);
+
     set(
       withDerived(
-        touchDocument(applyBlockUpdates(prev, reindexed), block.documentId),
+        touchDocument(nextSnapshot, block.documentId),
       ),
     );
     return newId;
@@ -736,7 +744,6 @@ export const useDocumentStore = create<DocumentStoreState>((set, get) => ({
 
     const timestamp = nowIso();
 
-    // Always keep at least one block in the document
     if (ordered.length === 1) {
       const cleared: Block = {
         ...block,
@@ -754,7 +761,6 @@ export const useDocumentStore = create<DocumentStoreState>((set, get) => ({
       return cleared.id;
     }
 
-    // Detach linked child doc to root if present
     let documents = { ...prev.documents };
     let rootDocumentIds = prev.rootDocumentIds;
     if (block.linkedDocumentId) {
@@ -911,7 +917,7 @@ export const useDocumentStore = create<DocumentStoreState>((set, get) => ({
  */
 export function DocumentStoreProvider({
   children,
-  repository = localWorkspaceRepository,
+  repository = apiWorkspaceRepository,
 }: {
   children: ReactNode;
   repository?: WorkspaceRepository;

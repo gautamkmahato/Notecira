@@ -5,7 +5,7 @@
  * Suggested tables:
  *   folders(id, name, parent_folder_id, sort_order, created_at, updated_at)
  *   documents(id, title, folder_id, parent_block_id, sort_order, deleted_at, created_at, updated_at)
- *   blocks(id, document_id, type, content, attrs jsonb, position, linked_document_id, created_at, updated_at)
+ *   blocks(id, document_id, parent_block_id, type, content, attrs jsonb, position, linked_document_id, created_at, updated_at)
  */
 
 export type BlockType =
@@ -45,6 +45,11 @@ export type MediaAttrs = {
   /** image / video display width */
   width?: "sm" | "md" | "lg" | "full";
   align?: "left" | "center" | "right";
+  /** image object-fit when displayed */
+  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
+  /** custom display size (px) — set via corner resize */
+  imageWidthPx?: number;
+  imageHeightPx?: number;
   /**
    * video playback:
    * - auto: YouTube URLs → iframe, otherwise file
@@ -59,6 +64,8 @@ export type CodeAttrs = {
   wrap?: boolean;
   theme?: "dark" | "light";
   showLineNumbers?: boolean;
+  /** "auto" grows with content; number = fixed height in px */
+  codeHeight?: "auto" | number;
 };
 
 /** Multi-item list stored on one block (Google Docs–style within a block). */
@@ -177,6 +184,7 @@ export function defaultAttrsForType(type: BlockType): BlockAttrs {
         wrap: true,
         theme: "dark",
         showLineNumbers: false,
+        codeHeight: "auto",
       };
     case "image":
       return {
@@ -185,6 +193,7 @@ export function defaultAttrsForType(type: BlockType): BlockAttrs {
         alt: "",
         width: "full",
         align: "left",
+        objectFit: "contain",
       };
     case "video":
       return {

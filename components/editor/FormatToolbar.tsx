@@ -1,21 +1,28 @@
 "use client";
 
 import { useDocumentStore } from "@/lib/document-store";
-import type { BlockType } from "@/lib/domain/types";
-import { isTextLikeBlockType } from "@/lib/domain/types";
 import {
-  BLOCK_TYPE_LABELS,
-  INSERTABLE_BLOCK_TYPES,
-} from "@/lib/editor/block-meta";
-import {
-  buildTipTapFormatApi,
-  useActiveTipTap,
-} from "@/lib/editor/tiptap/active-editor";
+  buildInlineFormatApi,
+  useInlineMarkState,
+} from "@/lib/editor/rich-text/active-editor";
 import { emptyInlineApi, getToolbarOptions } from "@/lib/editor/toolbar/types";
 import { toolbarRegistry } from "@/lib/editor/toolbar/registry";
+import { textFormatOptions } from "@/lib/editor/toolbar/options/text";
 
 type FormatToolbarProps = {
   blockId: string | null;
+};
+
+const EMPTY_BLOCK = {
+  id: "",
+  documentId: "",
+  type: "paragraph" as const,
+  content: "",
+  attrs: {},
+  position: 0,
+  linkedDocumentId: null,
+  createdAt: "",
+  updatedAt: "",
 };
 
 export function FormatToolbar({ blockId }: FormatToolbarProps) {
@@ -27,61 +34,40 @@ export function FormatToolbar({ blockId }: FormatToolbarProps) {
   const block = blockId ? getBlock(blockId) : undefined;
 
   const activeType = block?.type ?? "paragraph";
-  const options = getToolbarOptions(toolbarRegistry, activeType);
-  const editor = useActiveTipTap(blockId);
-  const inline = block
-    ? buildTipTapFormatApi(block.id, editor)
-    : emptyInlineApi();
+  const options = block
+    ? getToolbarOptions(toolbarRegistry, activeType)
+    : textFormatOptions;
+  useInlineMarkState(blockId);
+  const inline = block ? buildInlineFormatApi(block.id) : emptyInlineApi();
 
-  const textNeedsFocus =
-    Boolean(block) && isTextLikeBlockType(activeType) && !inline.available;
+  const renderBlock = block ?? EMPTY_BLOCK;
+  const patchAttrs = block
+    ? (patch: Partial<typeof block.attrs>) => updateBlockAttrs(block.id, patch)
+    : () => {};
+  const setContent = block
+    ? (content: string) => updateBlockContent(block.id, content)
+    : () => {};
+  const setType = block
+    ? (type: typeof block.type) => updateBlockType(block.id, type)
+    : () => {};
 
   return (
-    <div className="border-b border-slate-200/70 bg-[#f4f5f7] px-3 py-2.5" data-editor="tiptap">
-      <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-1 rounded-xl bg-[#eceef1] px-2 py-1.5 shadow-sm">
-        {block ? (
-          <>
-            <label className="flex items-center gap-1.5 rounded-lg px-1.5 text-[11px] font-medium text-slate-500">
-              <span className="text-slate-400">Type</span>
-              <select
-                value={block.type}
-                onChange={(e) =>
-                  updateBlockType(block.id, e.target.value as BlockType)
-                }
-                className="h-8 rounded-lg border-0 bg-transparent px-1.5 text-sm font-medium text-slate-700 outline-none hover:bg-slate-200/60"
-              >
-                {INSERTABLE_BLOCK_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {BLOCK_TYPE_LABELS[type]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <span className="mx-1 h-5 w-px bg-slate-300/80" />
-          </>
-        ) : null}
-
-        {!block ? (
-          <span className="px-2 text-xs text-slate-400">
-            Select a block to edit its options
-          </span>
-        ) : textNeedsFocus ? (
-          <span className="px-2 text-xs text-slate-400">
-            Click into the text to format
-          </span>
-        ) : (
-          options.map((option) => (
-            <div key={option.id} className="flex items-center">
-              {option.render({
-                block,
-                patchAttrs: (patch) => updateBlockAttrs(block.id, patch),
-                setContent: (content) => updateBlockContent(block.id, content),
-                setType: (type) => updateBlockType(block.id, type),
-                inline,
-              })}
-            </div>
-          ))
-        )}
+    <div
+      className="relative z-[var(--z-10)] flex min-h-12 shrink-0 items-center justify-center overflow-visible border-b border-[var(--color-light-gray-2)] bg-[var(--color-white)] px-3 sm:px-4"
+      data-editor="rich-text"
+    >
+      <div className="flex min-h-9 w-full min-w-0 items-center justify-center gap-1 overflow-visible rounded-[var(--radius-xl)] px-1.5 py-1.5">
+        {options.map((option) => (
+          <div key={option.id} className="flex shrink-0 items-center">
+            {option.render({
+              block: renderBlock,
+              patchAttrs,
+              setContent,
+              setType,
+              inline,
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ export const EQUAL_LAYOUT_MAX_COLUMNS = 2;
 export const FIXED_COLUMN_WIDTH_PX = 450;
 
 /** Solo / focused document max width — matches single-doc centered layout. */
-export const SOLO_COLUMN_MAX_WIDTH_PX = 720;
+export const SOLO_COLUMN_MAX_WIDTH_PX = 820;
 
 export const MIN_COLUMN_WIDTH_PX = 280;
 export const MAX_COLUMN_WIDTH_PX = 900;

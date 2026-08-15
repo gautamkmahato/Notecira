@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDocumentStore } from "@/lib/document-store";
 import type { BlockType } from "@/lib/domain/types";
+import { registerActiveBlock, clearActiveBlockIfDoc } from "@/lib/editor/active-block";
 import { BlockRow } from "./BlockRow";
-import { FormatToolbar } from "./editor/FormatToolbar";
 import { InsertBlockMenu } from "./editor/InsertBlockMenu";
 
 type BlockEditorProps = {
   docId: string;
   columnIndex: number;
+  columnCount: number;
+  contentPad: string;
   editable: boolean;
   openLinkedDocId?: string;
   onOpenLinked: (columnIndex: number, docId: string) => void;
@@ -18,11 +20,14 @@ type BlockEditorProps = {
 export function BlockEditor({
   docId,
   columnIndex,
+  columnCount,
+  contentPad,
   editable,
   openLinkedDocId,
   onOpenLinked,
 }: BlockEditorProps) {
   const getDocument = useDocumentStore((s) => s.getDocument);
+  const getBlock = useDocumentStore((s) => s.getBlock);
   const getBlocksForDocument = useDocumentStore((s) => s.getBlocksForDocument);
   const insertBlock = useDocumentStore((s) => s.insertBlock);
   const updateBlockType = useDocumentStore((s) => s.updateBlockType);
@@ -47,7 +52,10 @@ export function BlockEditor({
   const handleRequestFocus = useCallback((blockId: string, caret?: number) => {
     setSelectedBlockId(blockId);
     setAutofocusRequest({ blockId, caret });
-  }, []);
+    if (editable) {
+      registerActiveBlock({ docId, blockId, editable: true });
+    }
+  }, [docId, editable]);
 
   const handleInsert = useCallback(
     (type: BlockType, afterId?: string | null) => {
@@ -118,20 +126,31 @@ export function BlockEditor({
 
   if (!document) {
     return (
-      <p className="px-3 py-2 text-sm text-slate-500">Document not found.</p>
+      <p className="px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">Document not found.</p>
     );
   }
 
   const activeSelection =
-    selectedBlockId && blocks.some((b) => b.id === selectedBlockId)
+    selectedBlockId && getBlock(selectedBlockId)
       ? selectedBlockId
       : (blocks[0]?.id ?? null);
 
+  useEffect(() => {
+    if (!editable) {
+      clearActiveBlockIfDoc(docId);
+      return;
+    }
+    registerActiveBlock({ docId, blockId: activeSelection, editable: true });
+    return () => clearActiveBlockIfDoc(docId);
+  }, [docId, activeSelection, editable]);
+
+  const compactGutter = columnCount > 1;
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {editable ? <FormatToolbar blockId={activeSelection} /> : null}
-
-      <div className="flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto px-1 py-3">
+      <div
+        className={`scrollbar-custom flex min-h-0 flex-1 flex-col gap-0 overflow-x-visible overflow-y-auto py-3 ${contentPad}`}
+      >
         {blocks.map((block) => {
           const isActiveInPath = Boolean(
             openLinkedDocId && block.linkedDocumentId === openLinkedDocId,
@@ -142,6 +161,7 @@ export function BlockEditor({
               key={block.id}
               blockId={block.id}
               columnIndex={columnIndex}
+              compactGutter={compactGutter}
               isActiveInPath={isActiveInPath}
               isSelected={activeSelection === block.id}
               editable={editable}

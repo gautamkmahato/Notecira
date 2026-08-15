@@ -1,25 +1,12 @@
 "use client";
 
 import type { ToolbarOptionDef } from "../types";
+import { FontFamilySelect } from "../components/font-family-select";
+import { FontSizeControl } from "../components/font-size-control";
+import { TextColorPicker } from "../components/text-color-picker";
+import { ToolbarDivider } from "../components/toolbar-divider";
 
-const COLORS = [
-  { label: "Ink", value: "#1e293b" },
-  { label: "Gray", value: "#64748b" },
-  { label: "Red", value: "#b91c1c" },
-  { label: "Orange", value: "#c2410c" },
-  { label: "Green", value: "#15803d" },
-  { label: "Blue", value: "#1d4ed8" },
-  { label: "Teal", value: "#0f766e" },
-];
-
-const FONT_SIZES = [
-  { label: "S", value: "sm" as const },
-  { label: "M", value: "md" as const },
-  { label: "L", value: "lg" as const },
-  { label: "XL", value: "xl" as const },
-];
-
-/** TipTap-style toolbar toggle (soft active pill like image 2). */
+/** TipTap-style toolbar toggle (soft active pill). */
 function ToggleBtn({
   active,
   label,
@@ -44,10 +31,10 @@ function ToggleBtn({
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm transition disabled:opacity-40 ${
+      className={`inline-flex h-8 min-w-8 items-center justify-center rounded-[var(--radius-lg)] px-2 text-[var(--font-size-sm)] transition disabled:opacity-40 ${
         active
-          ? "bg-[#ebe4f5] text-[#5b21b6]"
-          : "text-slate-600 hover:bg-slate-200/70"
+          ? "bg-[var(--notion-selected)] text-[var(--color-dark-gray-2)]"
+          : "text-[var(--color-dark-gray)] hover:bg-[var(--notion-hover)]"
       } ${className}`}
     >
       {label}
@@ -55,18 +42,31 @@ function ToggleBtn({
   );
 }
 
-/*
- * LEGACY custom contentEditable text options (kept for reference).
- * Replaced by TipTap-backed options below — do not delete.
- *
- * export const textFormatOptionsLegacy: ToolbarOptionDef[] = [ ... ]
- */
-
 /**
- * TipTap text formatting options (MIT / free core).
- * Applies marks to the current selection only.
+ * TipTap text formatting options — font, size, style, and color.
+ * Used for paragraphs, headings, and list items.
  */
 export const textFormatOptions: ToolbarOptionDef[] = [
+  {
+    id: "fontFamily",
+    label: "Font",
+    render: ({ inline }) => <FontFamilySelect inline={inline} />,
+  },
+  {
+    id: "divider-font",
+    label: "",
+    render: () => <ToolbarDivider />,
+  },
+  {
+    id: "fontSize",
+    label: "Size",
+    render: ({ inline }) => <FontSizeControl inline={inline} />,
+  },
+  {
+    id: "divider-size",
+    label: "",
+    render: () => <ToolbarDivider />,
+  },
   {
     id: "bold",
     label: "Bold",
@@ -107,65 +107,13 @@ export const textFormatOptions: ToolbarOptionDef[] = [
     ),
   },
   {
-    id: "fontSize",
-    label: "Size",
-    render: ({ inline }) => (
-      <div className="flex items-center gap-0.5 rounded-lg bg-slate-100/80 p-0.5">
-        {FONT_SIZES.map((size) => (
-          <button
-            key={size.value}
-            type="button"
-            title={`Size ${size.label}`}
-            disabled={!inline.available}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => inline.setFontSize(size.value)}
-            className={`inline-flex h-7 min-w-7 items-center justify-center rounded-md text-[11px] font-medium disabled:opacity-40 ${
-              inline.state.fontSize === size.value
-                ? "bg-[#ebe4f5] text-[#5b21b6]"
-                : "text-slate-600 hover:bg-white"
-            }`}
-          >
-            {size.label}
-          </button>
-        ))}
-      </div>
-    ),
+    id: "divider-style",
+    label: "",
+    render: () => <ToolbarDivider />,
   },
   {
     id: "textColor",
     label: "Color",
-    render: ({ inline }) => (
-      <div className="flex items-center gap-1.5 pl-1">
-        <span className="text-[11px] font-medium text-slate-400">A</span>
-        <div className="flex items-center gap-1">
-          {COLORS.map((color) => (
-            <button
-              key={color.value}
-              type="button"
-              title={color.label}
-              disabled={!inline.available}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => inline.setColor(color.value)}
-              className={`h-4 w-4 rounded-full border disabled:opacity-40 ${
-                inline.state.color && rgbClose(inline.state.color, color.value)
-                  ? "border-violet-600 ring-2 ring-violet-200"
-                  : "border-white shadow-sm"
-              }`}
-              style={{ backgroundColor: color.value }}
-            />
-          ))}
-        </div>
-      </div>
-    ),
+    render: ({ inline }) => <TextColorPicker inline={inline} />,
   },
 ];
-
-function rgbClose(computed: string, hex: string): boolean {
-  if (typeof document === "undefined") return false;
-  const probe = document.createElement("span");
-  probe.style.color = hex;
-  document.body.appendChild(probe);
-  const target = getComputedStyle(probe).color;
-  document.body.removeChild(probe);
-  return computed === target;
-}

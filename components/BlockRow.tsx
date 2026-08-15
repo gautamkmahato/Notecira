@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { CornerDownRight, GripVertical, Plus } from "lucide-react";
 import { displayTitle, useDocumentStore } from "@/lib/document-store";
 import type { BlockType } from "@/lib/domain/types";
 import { canLinkBlock } from "@/lib/editor/block-meta";
@@ -10,6 +11,7 @@ import { SlashCommandMenu } from "./editor/SlashCommandMenu";
 type BlockRowProps = {
   blockId: string;
   columnIndex: number;
+  compactGutter: boolean;
   isActiveInPath: boolean;
   isSelected: boolean;
   editable: boolean;
@@ -30,6 +32,7 @@ type BlockRowProps = {
 export function BlockRow({
   blockId,
   columnIndex,
+  compactGutter,
   isActiveInPath,
   isSelected,
   editable,
@@ -57,6 +60,7 @@ export function BlockRow({
   const [slashQuery, setSlashQuery] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const didDragRef = useRef(false);
   const slashOpen = editable && slashQuery !== null;
 
   const block = getBlock(blockId);
@@ -66,7 +70,7 @@ export function BlockRow({
 
   useEffect(() => {
     if (!menuOpen) return;
-    const onPointer = (event: MouseEvent) => {
+    const onPointer = (event: globalThis.MouseEvent) => {
       if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
     };
     window.addEventListener("mousedown", onPointer);
@@ -107,17 +111,31 @@ export function BlockRow({
     if (focusId) onRequestFocus(focusId, 0);
   };
 
+  const handleUnlink = () => {
+    unlinkBlock(blockId);
+    setMenuOpen(false);
+  };
+
+  const handleGripClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    if (didDragRef.current) {
+      didDragRef.current = false;
+      return;
+    }
+    setMenuOpen((open) => !open);
+  };
+
+  const contentClassName = `relative min-w-0 flex-1 rounded-[var(--radius-xl)] py-0.5 transition-colors duration-[var(--duration-fast)] ${
+    dragOver ? "shadow-[inset_0_4px_0_0_var(--color-blue)]" : ""
+  }`;
+
+  const gutterClassName = compactGutter
+    ? "absolute right-full py-1.5 top-0.5 z-[var(--z-3)] mr-1 flex flex-col items-center gap-0.5 opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-100 group-focus-within:opacity-100"
+    : "absolute right-full py-1.5 top-0.5 z-[var(--z-3)] mr-1 flex flex-row items-center gap-0.5 opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-100 group-focus-within:opacity-100";
+
   return (
     <div
-      className={`group relative flex items-start gap-0.5 rounded-sm px-1 py-0.5 transition-colors ${
-        dragOver
-          ? "border-t-2 border-teal-500"
-          : isSelected
-            ? "bg-sky-50/70"
-            : isActiveInPath
-              ? "bg-teal-50/80"
-              : "hover:bg-slate-50/80"
-      }`}
+      className="group relative py-1.5"
       onMouseDown={() => onSelect(blockId)}
       onDragOver={(e) => {
         if (!editable) return;
@@ -131,7 +149,10 @@ export function BlockRow({
       }}
     >
       {editable ? (
-        <div className="flex w-[76px] shrink-0 items-center justify-end gap-0.5 pt-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+        <div
+          className={`${gutterClassName}${menuOpen ? " opacity-100" : ""}`}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
           <button
             type="button"
             title="Add block below"
@@ -140,52 +161,69 @@ export function BlockRow({
               e.stopPropagation();
               onInsertBelow(blockId);
             }}
-            className="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:bg-slate-200/80 hover:text-slate-700"
+            className="notion-icon-btn"
           >
-            <PlusIcon />
+            <Plus size={14} strokeWidth={1.75} />
           </button>
-          <button
-            type="button"
-            title="Drag to reorder"
-            aria-label="Drag to reorder"
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.effectAllowed = "move";
-              e.dataTransfer.setData("text/plain", blockId);
-              onDragStart(blockId);
-            }}
-            onDragEnd={onDragEnd}
-            className="flex h-6 w-6 cursor-grab items-center justify-center rounded text-slate-400 hover:bg-slate-200/80 hover:text-slate-700 active:cursor-grabbing"
-          >
-            <DragHandleIcon />
-          </button>
+
           <div className="relative" ref={menuRef}>
             <button
               type="button"
-              title="Block actions"
-              aria-label="Block actions"
+              title="Drag to reorder · click for actions"
+              aria-label="Drag to reorder, click for block actions"
               aria-expanded={menuOpen}
-              onClick={(e) => {
-                e.stopPropagation();
-                setMenuOpen((v) => !v);
+              aria-haspopup="menu"
+              draggable
+              onDragStart={(e) => {
+                didDragRef.current = true;
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", blockId);
+                onDragStart(blockId);
               }}
-              className="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:bg-slate-200/80 hover:text-slate-700"
+              onDragEnd={() => {
+                onDragEnd();
+                window.setTimeout(() => {
+                  didDragRef.current = false;
+                }, 0);
+              }}
+              onClick={handleGripClick}
+              className="notion-icon-btn cursor-grab active:cursor-grabbing"
             >
-              <MoreIcon />
+              <GripVertical size={14} strokeWidth={1.75} />
             </button>
+
             {menuOpen ? (
-              <div className="absolute left-0 top-full z-30 mt-1 w-36 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+              <div
+                className={`notion-menu absolute z-[var(--z-14)] w-36 ${
+                  compactGutter
+                    ? "left-full top-0 ml-1"
+                    : "left-0 top-full mt-1"
+                }`}
+                role="menu"
+              >
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={handleDuplicate}
-                  className="block w-full px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                  className="notion-menu-item"
                 >
                   Duplicate
                 </button>
+                {linkedDoc && editable ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleUnlink}
+                    className="notion-menu-item"
+                  >
+                    Unlink
+                  </button>
+                ) : null}
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={handleDelete}
-                  className="block w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50"
+                  className="notion-menu-item notion-menu-item-danger"
                 >
                   Delete
                 </button>
@@ -193,11 +231,9 @@ export function BlockRow({
             ) : null}
           </div>
         </div>
-      ) : (
-        <div className="w-3 shrink-0" />
-      )}
+      ) : null}
 
-      <div className="relative min-w-0 flex-1 py-0.5">
+      <div className={contentClassName}>
         <BlockBody
           block={block}
           isSelected={isSelected}
@@ -224,71 +260,34 @@ export function BlockRow({
 
         {showLink ? (
           linkedDoc ? (
-            <div className="mb-1 mt-0.5 flex flex-wrap items-center gap-2 text-xs">
+            <div className="pointer-events-none absolute bottom-0.5 right-0 z-[var(--z-2)] max-w-full opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
               <button
                 type="button"
                 onClick={handleOpen}
-                className="max-w-full truncate text-left font-medium text-teal-700 hover:underline"
+                className="inline-flex max-w-full items-center gap-1 truncate rounded-[var(--radius-lg)] bg-[var(--color-white)] px-1 text-right text-xs font-medium text-[var(--color-blue)] shadow-[var(--shadow-sm)] hover:underline"
               >
-                ↳ {displayTitle(linkedDoc.title)}
+                <CornerDownRight
+                  size={12}
+                  strokeWidth={1.75}
+                  className="shrink-0"
+                />
+                {displayTitle(linkedDoc.title)}
               </button>
-              {editable ? (
-                <button
-                  type="button"
-                  onClick={() => unlinkBlock(blockId)}
-                  className="text-slate-400 opacity-0 transition hover:text-slate-600 group-hover:opacity-100"
-                >
-                  Unlink
-                </button>
-              ) : null}
             </div>
           ) : editable ? (
-            <button
-              type="button"
-              onClick={handleLink}
-              className="mb-1 mt-0.5 text-xs text-slate-400 opacity-0 transition hover:text-teal-700 group-hover:opacity-100 focus:opacity-100"
-            >
-              Link →
-            </button>
+            <div className="pointer-events-none absolute bottom-0.5 right-0 z-[var(--z-2)] opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+              <button
+                type="button"
+                onClick={handleLink}
+                className="inline-flex items-center gap-1 rounded-[var(--radius-lg)] bg-[var(--color-white)] px-1 text-xs text-[var(--color-mid-gray)] shadow-[var(--shadow-sm)] hover:text-[var(--color-blue)]"
+              >
+                <CornerDownRight size={12} strokeWidth={1.75} />
+                Link
+              </button>
+            </div>
           ) : null
         ) : null}
       </div>
     </div>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-      <path
-        d="M7 2.5v9M2.5 7h9"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function DragHandleIcon() {
-  return (
-    <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden>
-      <circle cx="3" cy="2.5" r="1.1" />
-      <circle cx="7" cy="2.5" r="1.1" />
-      <circle cx="3" cy="7" r="1.1" />
-      <circle cx="7" cy="7" r="1.1" />
-      <circle cx="3" cy="11.5" r="1.1" />
-      <circle cx="7" cy="11.5" r="1.1" />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
-      <circle cx="7" cy="3" r="1.2" />
-      <circle cx="7" cy="7" r="1.2" />
-      <circle cx="7" cy="11" r="1.2" />
-    </svg>
   );
 }

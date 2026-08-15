@@ -1,4 +1,7 @@
-import type { BlockAttrs } from "@/lib/domain/types";
+import {
+  clampFontSizePx,
+  parseFontSizePx,
+} from "./font-size";
 import { normalizeEmptyHtml } from "./html";
 
 export type InlineMarkState = {
@@ -6,14 +9,8 @@ export type InlineMarkState = {
   italic: boolean;
   underline: boolean;
   color: string | null;
-  fontSize: BlockAttrs["fontSize"] | null;
-};
-
-export const FONT_SIZE_PX: Record<NonNullable<BlockAttrs["fontSize"]>, string> = {
-  sm: "13px",
-  md: "15px",
-  lg: "18px",
-  xl: "22px",
+  fontFamily: string | null;
+  fontSizePx: number | null;
 };
 
 export function emptyInlineState(): InlineMarkState {
@@ -22,37 +19,9 @@ export function emptyInlineState(): InlineMarkState {
     italic: false,
     underline: false,
     color: null,
-    fontSize: null,
+    fontFamily: null,
+    fontSizePx: null,
   };
-}
-
-export function queryInlineState(): InlineMarkState {
-  if (typeof document === "undefined") return emptyInlineState();
-
-  const bold = document.queryCommandState("bold");
-  const italic = document.queryCommandState("italic");
-  const underline = document.queryCommandState("underline");
-
-  let color: string | null = null;
-  let fontSize: BlockAttrs["fontSize"] | null = null;
-
-  const sel = window.getSelection();
-  if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
-    const node = sel.anchorNode?.nodeType === Node.ELEMENT_NODE
-      ? (sel.anchorNode as Element)
-      : sel.anchorNode?.parentElement;
-    if (node) {
-      const style = window.getComputedStyle(node);
-      color = style.color || null;
-      const px = style.fontSize;
-      fontSize =
-        (Object.entries(FONT_SIZE_PX).find(([, value]) => value === px)?.[0] as
-          | BlockAttrs["fontSize"]
-          | undefined) ?? null;
-    }
-  }
-
-  return { bold, italic, underline, color, fontSize };
 }
 
 function selectionInside(root: HTMLElement): boolean {
@@ -63,17 +32,57 @@ function selectionInside(root: HTMLElement): boolean {
   return root.contains(node.nodeType === Node.TEXT_NODE ? node.parentNode : node);
 }
 
-/** Apply a mark to the current selection inside `root`. No-op if selection is outside. */
+function styleTarget(root: HTMLElement): Element | null {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return null;
+  if (!selectionInside(root)) return null;
+
+  let node: Node | null = sel.anchorNode;
+  if (node?.nodeType === Node.TEXT_NODE) node = node.parentElement;
+  return (node as Element | null) ?? null;
+}
+
+export function queryInlineState(root: HTMLElement): InlineMarkState {
+  if (typeof document === "undefined") return emptyInlineState();
+
+  const bold = document.queryCommandState("bold");
+  const italic = document.queryCommandState("italic");
+  const underline = document.queryCommandState("underline");
+
+  const target = styleTarget(root);
+  if (!target) {
+    return { bold, italic, underline, color: null, fontFamily: null, fontSizePx: null };
+  }
+
+  const style = window.getComputedStyle(target);
+  const color = style.color || null;
+  const fontFamily = style.fontFamily?.replace(/['"]+/g, "") || null;
+  const fontSizePx = parseFontSizePx(style.fontSize);
+
+  return { bold, italic, underline, color, fontFamily, fontSizePx };
+}
+
+/** Apply a mark to the current selection inside `root`. */
 export function applyInlineCommand(
   root: HTMLElement,
-  command: "bold" | "italic" | "underline" | "foreColor" | "fontSize",
+  command:
+    | "bold"
+    | "italic"
+    | "underline"
+    | "foreColor"
+    | "fontSize"
+    | "fontFamily",
   value?: string,
 ): boolean {
   if (!selectionInside(root)) return false;
   root.focus();
 
-  if (command === "fontSize" && value) {
-    return wrapSelectionWithSpan(root, { fontSize: value });
+  if ((command === "fontSize" || command === "fontFamily") && value) {
+    const styles =
+      command === "fontSize"
+        ? { fontSize: value }
+        : { fontFamily: value };
+    return wrapSelectionWithSpan(root, styles);
   }
 
   if (command === "foreColor" && value) {
@@ -87,15 +96,31 @@ export function applyInlineCommand(
 
 function wrapSelectionWithSpan(
   root: HTMLElement,
-  styles: { fontSize?: string; color?: string },
+  styles: { fontSize?: string; fontFamily?: string; color?: string },
 ): boolean {
   const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return false;
+  if (!sel || sel.rangeCount === 0) return false;
   if (!selectionInside(root)) return false;
 
   const range = sel.getRangeAt(0);
+  if (sel.isCollapsed) {
+    const span = document.createElement("span");
+    if (styles.fontSize) span.style.fontSize = styles.fontSize;
+    if (styles.fontFamily) span.style.fontFamily = styles.fontFamily;
+    if (styles.color) span.style.color = styles.color;
+    span.appendChild(document.createTextNode("\u200b"));
+    range.insertNode(span);
+    const next = document.createRange();
+    next.setStart(span.firstChild!, 1);
+    next.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(next);
+    return true;
+  }
+
   const span = document.createElement("span");
   if (styles.fontSize) span.style.fontSize = styles.fontSize;
+  if (styles.fontFamily) span.style.fontFamily = styles.fontFamily;
   if (styles.color) span.style.color = styles.color;
 
   try {
@@ -173,3 +198,5 @@ export function setCaretPlainOffset(root: HTMLElement, offset: number): void {
   sel?.removeAllRanges();
   sel?.addRange(range);
 }
+
+export { clampFontSizePx };
