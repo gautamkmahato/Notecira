@@ -109,6 +109,7 @@ function normalizeBlockType(type: string | undefined): BlockType {
     "image",
     "video",
     "pdf",
+    "document",
   ];
   if (type && (allowed as string[]).includes(type)) {
     return type as BlockType;

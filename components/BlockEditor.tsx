@@ -149,7 +149,7 @@ export function BlockEditor({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div
-        className={`scrollbar-custom flex min-h-0 flex-1 flex-col gap-0 overflow-x-visible overflow-y-auto py-3 ${contentPad}`}
+        className={`scrollbar-custom block-editor-blocks flex min-h-0 flex-1 flex-col gap-0 overflow-x-visible overflow-y-auto py-3 ${contentPad}`}
       >
         {blocks.map((block) => {
           const isActiveInPath = Boolean(

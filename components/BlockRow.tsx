@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { CornerDownRight, GripVertical, Plus } from "lucide-react";
 import { displayTitle, useDocumentStore } from "@/lib/document-store";
 import type { BlockType } from "@/lib/domain/types";
@@ -59,7 +59,9 @@ export function BlockRow({
 
   const [slashQuery, setSlashQuery] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpensUp, setMenuOpensUp] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const didDragRef = useRef(false);
   const slashOpen = editable && slashQuery !== null;
 
@@ -76,6 +78,34 @@ export function BlockRow({
     window.addEventListener("mousedown", onPointer);
     return () => window.removeEventListener("mousedown", onPointer);
   }, [menuOpen]);
+
+  useLayoutEffect(() => {
+    if (!menuOpen || compactGutter) {
+      setMenuOpensUp(false);
+      return;
+    }
+
+    const updatePlacement = () => {
+      const menu = dropdownRef.current;
+      const anchor = menuRef.current;
+      if (!menu || !anchor) return;
+
+      const anchorRect = anchor.getBoundingClientRect();
+      const menuHeight = menu.scrollHeight;
+      const spaceBelow = window.innerHeight - anchorRect.bottom - 8;
+      const spaceAbove = anchorRect.top - 8;
+
+      setMenuOpensUp(spaceBelow < menuHeight && spaceAbove > spaceBelow);
+    };
+
+    updatePlacement();
+    window.addEventListener("resize", updatePlacement);
+    window.addEventListener("scroll", updatePlacement, true);
+    return () => {
+      window.removeEventListener("resize", updatePlacement);
+      window.removeEventListener("scroll", updatePlacement, true);
+    };
+  }, [compactGutter, linkedDoc, menuOpen]);
 
   if (!block) return null;
 
@@ -136,6 +166,7 @@ export function BlockRow({
   return (
     <div
       className="group relative py-1.5"
+      data-block-type={block.type}
       onMouseDown={() => onSelect(blockId)}
       onDragOver={(e) => {
         if (!editable) return;
@@ -194,10 +225,13 @@ export function BlockRow({
 
             {menuOpen ? (
               <div
+                ref={dropdownRef}
                 className={`notion-menu absolute z-[var(--z-14)] w-36 ${
                   compactGutter
                     ? "left-full top-0 ml-1"
-                    : "left-0 top-full mt-1"
+                    : menuOpensUp
+                      ? "bottom-full left-0 mb-1"
+                      : "left-0 top-full mt-1"
                 }`}
                 role="menu"
               >

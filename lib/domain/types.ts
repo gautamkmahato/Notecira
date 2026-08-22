@@ -20,7 +20,8 @@ export type BlockType =
   | "code"
   | "image"
   | "video"
-  | "pdf";
+  | "pdf"
+  | "document";
 
 /** Legacy block-level text attrs (inline marks in content HTML are preferred). */
 export type TextFormatAttrs = {
@@ -74,12 +75,30 @@ export type ListAttrs = {
   items?: string[];
 };
 
+/** Document block (Google Docs–style canvas) attrs. */
+export type DocumentBlockAttrs = {
+  elements?: Array<{
+    id: string;
+    type:
+      | "paragraph"
+      | "heading_1"
+      | "heading_2"
+      | "heading_3"
+      | "heading_4"
+      | "bullet_list"
+      | "numbered_list"
+      | "code";
+    content: string;
+  }>;
+};
+
 /** Type-specific JSON attrs (maps to jsonb in Postgres). */
 export type BlockAttrs = TextFormatAttrs &
   Partial<TableAttrs> &
   Partial<MediaAttrs> &
   Partial<CodeAttrs> &
-  Partial<ListAttrs>;
+  Partial<ListAttrs> &
+  Partial<DocumentBlockAttrs>;
 
 /** Row shape for `folders` */
 export type Folder = {
@@ -205,6 +224,8 @@ export function defaultAttrsForType(type: BlockType): BlockAttrs {
       };
     case "pdf":
       return { src: "", name: "" };
+    case "document":
+      return {};
     case "bulleted_list_item":
     case "numbered_list_item":
       return {};

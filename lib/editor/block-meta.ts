@@ -18,10 +18,12 @@ export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   image: "Image",
   video: "Video",
   pdf: "PDF",
+  document: "Document",
 };
 
 export const INSERTABLE_BLOCK_TYPES: BlockType[] = [
   "paragraph",
+  "document",
   "heading_1",
   "heading_2",
   "heading_3",
@@ -144,10 +146,11 @@ export function attrsForTypeChange(
     toType === "table" ||
     toType === "image" ||
     toType === "video" ||
-    toType === "pdf"
+    toType === "pdf" ||
+    toType === "document"
   ) {
     return {
-      content: "",
+      content: toType === "document" ? from.content : "",
       attrs: defaultAttrsForType(toType),
       linkedDocumentId: null,
     };

@@ -25,4 +25,5 @@ export const toolbarRegistry: ToolbarRegistry = {
   image: imageOptions,
   video: videoOptions,
   pdf: pdfOptions,
+  document: [],
 };

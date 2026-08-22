@@ -11,6 +11,7 @@ import {
 import { DocumentColumn } from "./DocumentColumn";
 import { CanvasScrollControls } from "./CanvasScrollControls";
 import { FormatToolbar } from "./editor/FormatToolbar";
+import { DocumentFormatToolbar } from "./document-block/DocumentFormatToolbar";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -167,6 +168,7 @@ export function Workspace() {
   }, []);
 
   const activeBlock = useActiveBlockSelection();
+  const getBlock = useDocumentStore((s) => s.getBlock);
 
   if (!hydrated) {
     return (
@@ -181,6 +183,8 @@ export function Workspace() {
     activeBlock?.docId && path.includes(activeBlock.docId)
       ? activeBlock.blockId
       : null;
+  const toolbarBlock = toolbarBlockId ? getBlock(toolbarBlockId) : undefined;
+  const isDocumentToolbar = toolbarBlock?.type === "document";
   const layout = isFocused ? "focus" : scrollLayout ? "fixed" : "equal";
   const canFocus = path.length > 1;
   const focusedIndex = focusDocId ? path.indexOf(focusDocId) : -1;
@@ -204,7 +208,11 @@ export function Workspace() {
         />
 
         {path.length > 0 ? (
-          <FormatToolbar blockId={toolbarBlockId} />
+          isDocumentToolbar ? (
+            <DocumentFormatToolbar blockId={toolbarBlockId} />
+          ) : (
+            <FormatToolbar blockId={toolbarBlockId} />
+          )
         ) : null}
 
         <div className="relative min-h-0 flex-1 overflow-hidden">

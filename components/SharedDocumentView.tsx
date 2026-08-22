@@ -62,7 +62,7 @@ function SharedBlockItem({
   );
 
   return (
-    <div className="group relative py-1.5">
+    <div className="group relative py-1.5" data-block-type={block.type}>
       <div className="relative min-w-0 flex-1 rounded-[var(--radius-xl)] py-0.5">
         <BlockBody
           block={block}
@@ -112,7 +112,7 @@ export function SharedBlockList({
   );
 
   return (
-    <div className="space-y-1">
+    <div className="block-editor-blocks space-y-1">
       {blocks.map((block) => (
         <SharedBlockItem
           key={block.id}

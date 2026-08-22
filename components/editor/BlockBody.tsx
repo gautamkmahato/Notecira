@@ -6,6 +6,7 @@ import { TableBlock } from "./TableBlock";
 import { CodeBlock } from "./CodeBlock";
 import { ImageBlock } from "./ImageBlock";
 import { VideoBlock } from "./VideoBlock";
+import { DocumentBlock } from "@/components/document-block/DocumentBlock";
 
 type BlockBodyProps = {
   block: Block;
@@ -137,6 +138,8 @@ export function BlockBody({
           ) : null}
         </div>
       );
+    case "document":
+      return <DocumentBlock {...textProps} />;
     case "paragraph":
     default:
       return <RichTextBlock {...textProps} />;

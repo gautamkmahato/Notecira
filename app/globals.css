@@ -273,6 +273,90 @@ body {
   color: var(--color-mid-gray);
 }
 
+/* Workspace numbered lists: one block per item — sequence across siblings */
+.block-editor-blocks > [data-block-type="numbered_list_item"] {
+  counter-increment: workspace-numbered-list;
+}
+
+.block-editor-blocks
+  > :not([data-block-type="numbered_list_item"])
+  + [data-block-type="numbered_list_item"],
+.block-editor-blocks > [data-block-type="numbered_list_item"]:first-child {
+  counter-reset: workspace-numbered-list;
+}
+
+.block-editor-blocks
+  .rich-text-block[data-mode="orderedList"]
+  [contenteditable] {
+  display: block;
+  list-style: none;
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+.block-editor-blocks
+  .rich-text-block[data-mode="orderedList"]
+  [contenteditable]::before {
+  content: counter(workspace-numbered-list) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.5rem;
+  text-align: right;
+  color: var(--color-mid-gray);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Document block lists — separate from workspace list blocks */
+.document-canvas-elements > [data-doc-element-type="numbered_list"] {
+  counter-increment: document-numbered-list;
+}
+
+.document-canvas-elements
+  > :not([data-doc-element-type="numbered_list"])
+  + [data-doc-element-type="numbered_list"],
+.document-canvas-elements
+  > [data-doc-element-type="numbered_list"]:first-child {
+  counter-reset: document-numbered-list;
+}
+
+.document-canvas-elements
+  [data-doc-element-type="bullet_list"]
+  [contenteditable],
+.document-canvas-elements
+  [data-doc-element-type="numbered_list"]
+  [contenteditable] {
+  display: block;
+  list-style: none;
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+.document-canvas-elements
+  [data-doc-element-type="bullet_list"]
+  [contenteditable]::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.5rem;
+  text-align: center;
+  color: var(--color-mid-gray);
+}
+
+.document-canvas-elements
+  [data-doc-element-type="numbered_list"]
+  [contenteditable]::before {
+  content: counter(document-numbered-list) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.5rem;
+  text-align: right;
+  color: var(--color-mid-gray);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Scrollbars (thin, visible on hover) ── */
 * {
   scrollbar-width: thin;

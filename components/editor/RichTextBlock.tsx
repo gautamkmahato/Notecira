@@ -223,13 +223,6 @@ export function RichTextBlock({
     }
   };
 
-  const listClass =
-    mode === "orderedList"
-      ? "list-decimal"
-      : mode === "bulletList"
-        ? "list-disc"
-        : "";
-
   return (
     <div className={`rich-text-block w-full ${isList ? "ml-6" : ""}`} data-mode={mode}>
       <div
@@ -253,7 +246,9 @@ export function RichTextBlock({
         onKeyUp={() => ref.current && registerMarks(ref.current)}
         onInput={onInput}
         onKeyDown={onKeyDown}
-        className={`block w-full leading-7 text-[var(--color-dark-gray-2)] outline-none data-[empty=true]:before:pointer-events-none data-[empty=true]:before:text-[var(--color-mid-gray)] data-[empty=true]:before:content-[attr(data-placeholder)] ${isList ? `list-item ${listClass}` : ""} ${className}`}
+        className={`block w-full leading-7 text-[var(--color-dark-gray-2)] outline-none data-[empty=true]:before:pointer-events-none data-[empty=true]:before:text-[var(--color-mid-gray)] data-[empty=true]:before:content-[attr(data-placeholder)] ${
+          isList && mode === "bulletList" ? "list-item list-disc" : ""
+        } ${className}`}
       />
     </div>
   );
