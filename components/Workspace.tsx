@@ -12,6 +12,7 @@ import { DocumentColumn } from "./DocumentColumn";
 import { CanvasScrollControls } from "./CanvasScrollControls";
 import { FormatToolbar } from "./editor/FormatToolbar";
 import { DocumentFormatToolbar } from "./document-block/DocumentFormatToolbar";
+import { MarkdownFormatToolbar } from "./markdown-block/MarkdownFormatToolbar";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -185,6 +186,7 @@ export function Workspace() {
       : null;
   const toolbarBlock = toolbarBlockId ? getBlock(toolbarBlockId) : undefined;
   const isDocumentToolbar = toolbarBlock?.type === "document";
+  const isMarkdownToolbar = toolbarBlock?.type === "markdown";
   const layout = isFocused ? "focus" : scrollLayout ? "fixed" : "equal";
   const canFocus = path.length > 1;
   const focusedIndex = focusDocId ? path.indexOf(focusDocId) : -1;
@@ -210,6 +212,8 @@ export function Workspace() {
         {path.length > 0 ? (
           isDocumentToolbar ? (
             <DocumentFormatToolbar blockId={toolbarBlockId} />
+          ) : isMarkdownToolbar ? (
+            <MarkdownFormatToolbar blockId={toolbarBlockId} />
           ) : (
             <FormatToolbar blockId={toolbarBlockId} />
           )

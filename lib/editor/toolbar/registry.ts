@@ -26,4 +26,5 @@ export const toolbarRegistry: ToolbarRegistry = {
   video: videoOptions,
   pdf: pdfOptions,
   document: [],
+  markdown: [],
 };

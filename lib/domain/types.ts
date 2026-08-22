@@ -21,7 +21,8 @@ export type BlockType =
   | "image"
   | "video"
   | "pdf"
-  | "document";
+  | "document"
+  | "markdown";
 
 /** Legacy block-level text attrs (inline marks in content HTML are preferred). */
 export type TextFormatAttrs = {
@@ -225,6 +226,8 @@ export function defaultAttrsForType(type: BlockType): BlockAttrs {
     case "pdf":
       return { src: "", name: "" };
     case "document":
+      return {};
+    case "markdown":
       return {};
     case "bulleted_list_item":
     case "numbered_list_item":

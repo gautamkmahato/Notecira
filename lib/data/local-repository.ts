@@ -110,6 +110,7 @@ function normalizeBlockType(type: string | undefined): BlockType {
     "video",
     "pdf",
     "document",
+    "markdown",
   ];
   if (type && (allowed as string[]).includes(type)) {
     return type as BlockType;

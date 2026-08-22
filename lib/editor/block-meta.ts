@@ -19,11 +19,13 @@ export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   video: "Video",
   pdf: "PDF",
   document: "Document",
+  markdown: "Markdown",
 };
 
 export const INSERTABLE_BLOCK_TYPES: BlockType[] = [
   "paragraph",
   "document",
+  "markdown",
   "heading_1",
   "heading_2",
   "heading_3",
@@ -147,10 +149,33 @@ export function attrsForTypeChange(
     toType === "image" ||
     toType === "video" ||
     toType === "pdf" ||
-    toType === "document"
+    toType === "document" ||
+    toType === "markdown"
   ) {
+    if (toType === "document") {
+      return {
+        content: from.content,
+        attrs: defaultAttrsForType(toType),
+        linkedDocumentId: null,
+      };
+    }
+
+    if (toType === "markdown") {
+      const content =
+        from.type === "code"
+          ? from.content
+          : fromList
+            ? listItemsPlainText(ensureListItems(from.attrs, from.content))
+            : htmlToPlainText(from.content);
+      return {
+        content,
+        attrs: defaultAttrsForType("markdown"),
+        linkedDocumentId: null,
+      };
+    }
+
     return {
-      content: toType === "document" ? from.content : "",
+      content: "",
       attrs: defaultAttrsForType(toType),
       linkedDocumentId: null,
     };
