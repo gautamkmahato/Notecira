@@ -1,5 +1,8 @@
 "use client";
 
+import { notionBtnPrimary, notionBtn } from "@/lib/ui/notion";
+
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { SharedDocumentPayload } from "@/lib/domain/sharing";
@@ -39,12 +42,12 @@ export function SharePageClient({ token }: SharePageProps) {
         {authRequired ? (
           <Link
             href={`/sign-in?next=${encodeURIComponent(`/share/${token}`)}`}
-            className="notion-btn notion-btn-primary"
+            className={notionBtnPrimary}
           >
             Sign in to continue
           </Link>
         ) : (
-          <Link href="/sign-in" className="notion-btn">
+          <Link href="/sign-in" className={notionBtn}>
             Go to sign in
           </Link>
         )}

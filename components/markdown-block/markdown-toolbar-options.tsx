@@ -1,10 +1,29 @@
 "use client";
 
-import type { ToolbarOptionDef } from "@/lib/editor/toolbar/types";
+import type { ReactNode } from "react";
+import type { Block, BlockAttrs, BlockType } from "@/lib/domain/types";
+import type { InlineFormatApi } from "@/lib/editor/rich-text/active-editor";
+import type { MarkdownBlockFormatApi } from "@/lib/markdown-block/active-editor";
 import { FontFamilySelect } from "@/lib/editor/toolbar/components/font-family-select";
 import { FontSizeControl } from "@/lib/editor/toolbar/components/font-size-control";
 import { TextColorPicker } from "@/lib/editor/toolbar/components/text-color-picker";
 import { ToolbarDivider } from "@/lib/editor/toolbar/components/toolbar-divider";
+import { MarkdownStructureButtons } from "./MarkdownStructureButtons";
+
+export type MarkdownToolbarOptionContext = {
+  block: Block;
+  patchAttrs: (patch: Partial<BlockAttrs>) => void;
+  setContent: (content: string) => void;
+  setType: (type: BlockType) => void;
+  inline: InlineFormatApi;
+  markdown: MarkdownBlockFormatApi;
+};
+
+export type MarkdownToolbarOptionDef = {
+  id: string;
+  label: string;
+  render: (ctx: MarkdownToolbarOptionContext) => ReactNode;
+};
 
 function ToggleBtn({
   active,
@@ -41,8 +60,8 @@ function ToggleBtn({
   );
 }
 
-/** Markdown block toolbar — mirrors document controls for now; customize later. */
-export const markdownToolbarOptions: ToolbarOptionDef[] = [
+/** Markdown block toolbar controls. */
+export const markdownToolbarOptions: MarkdownToolbarOptionDef[] = [
   {
     id: "fontFamily",
     label: "Font",
@@ -113,8 +132,13 @@ export const markdownToolbarOptions: ToolbarOptionDef[] = [
     render: ({ inline }) => <TextColorPicker inline={inline} />,
   },
   {
-    id: "divider-component",
+    id: "divider-structure",
     label: "",
     render: () => <ToolbarDivider />,
+  },
+  {
+    id: "structure",
+    label: "Structure",
+    render: ({ markdown }) => <MarkdownStructureButtons markdown={markdown} />,
   },
 ];

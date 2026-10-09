@@ -1,5 +1,8 @@
 "use client";
 
+import { notionBtnPrimary, notionIconBtn, notionBtn } from "@/lib/ui/notion";
+
+
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, Copy, Link2, X } from "lucide-react";
@@ -160,7 +163,7 @@ export function ShareDocumentModal({
           <button
             type="button"
             onClick={onClose}
-            className="notion-icon-btn"
+            className={notionIconBtn}
             aria-label="Close"
           >
             <X size={18} />
@@ -225,7 +228,7 @@ export function ShareDocumentModal({
                   <button
                     type="button"
                     onClick={addEmail}
-                    className="notion-btn"
+                    className={notionBtn}
                   >
                     Add
                   </button>
@@ -235,7 +238,7 @@ export function ShareDocumentModal({
                     {allowedEmails.map((email) => (
                       <li
                         key={email}
-                        className="flex items-center justify-between rounded-[var(--radius-lg)] bg-[var(--color-white-2)] px-3 py-1.5 text-[var(--font-size-sm)]"
+                        className="flex items-center justify-between rounded-[var(--radius-lg)] bg-[var(--color-white)] px-3 py-1.5 text-[var(--font-size-sm)]"
                       >
                         <span>{email}</span>
                         <button
@@ -258,7 +261,7 @@ export function ShareDocumentModal({
             ) : null}
 
             {showLink ? (
-              <div className="rounded-[var(--radius-xl)] border border-[var(--color-light-gray-2)] bg-[var(--color-white-2)] p-3">
+              <div className="rounded-[var(--radius-xl)] border border-[var(--color-light-gray-2)] bg-[var(--color-white)] p-3">
                 <div className="mb-2 flex items-center gap-2 text-[var(--font-size-sm)] font-medium text-[var(--color-dark-gray-2)]">
                   <Link2 size={16} />
                   Share link
@@ -272,7 +275,7 @@ export function ShareDocumentModal({
                   <button
                     type="button"
                     onClick={() => void copyLink()}
-                    className="notion-btn inline-flex items-center gap-1"
+                    className={`${notionBtn} inline-flex items-center gap-1`}
                   >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                     {copied ? "Copied" : "Copy"}
@@ -288,14 +291,14 @@ export function ShareDocumentModal({
             ) : null}
 
             <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={onClose} className="notion-btn">
+              <button type="button" onClick={onClose} className={notionBtn}>
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => void handleSave()}
                 disabled={saving}
-                className="notion-btn notion-btn-primary"
+                className={notionBtnPrimary}
               >
                 {saving ? "Saving…" : "Save"}
               </button>

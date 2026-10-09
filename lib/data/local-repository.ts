@@ -111,6 +111,7 @@ function normalizeBlockType(type: string | undefined): BlockType {
     "pdf",
     "document",
     "markdown",
+    "canvas",
   ];
   if (type && (allowed as string[]).includes(type)) {
     return type as BlockType;

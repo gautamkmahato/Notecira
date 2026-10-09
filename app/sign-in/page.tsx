@@ -17,7 +17,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
     : null;
 
   return (
-    <main className="flex min-h-full flex-col items-center justify-center bg-[var(--color-white-2)] px-4">
+    <main className="flex min-h-full flex-col items-center justify-center bg-[var(--color-white)] px-4">
       <div className="w-full max-w-sm rounded-[var(--radius-2xl)] border border-[var(--color-light-gray-2)] bg-[var(--color-white)] p-8 shadow-[var(--shadow-md)]">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--color-dark-gray-2)] text-[var(--font-size-lg)] font-medium text-[var(--color-white)]">

@@ -1,5 +1,8 @@
 "use client";
 
+import { scrollbarCustom } from "@/lib/ui/notion";
+
+
 import { useCallback, useRef } from "react";
 import Editor from "react-simple-code-editor";
 import type { Block } from "@/lib/domain/types";
@@ -62,7 +65,7 @@ export function CodeBlock({ block, editable = true, onSelect }: CodeBlockProps) 
     >
       <div
         ref={editorRef}
-        className={`scrollbar-custom ${
+        className={`${scrollbarCustom} ${
           fixedHeight ? "overflow-auto" : "overflow-x-auto overflow-y-visible"
         }`}
         style={fixedHeight ? { height: `${fixedHeight}px` } : undefined}

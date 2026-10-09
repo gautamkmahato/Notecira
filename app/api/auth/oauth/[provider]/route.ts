@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAuthActions } from "@insforge/sdk/ssr";
 import { getAppOrigin } from "@/lib/insforge/env";
+import {
+  authCookieSettings,
+  getInsforgeAuthConfig,
+} from "@/lib/insforge/auth-session";
 
 const PROVIDERS = new Set(["google", "github"]);
 const VERIFIER_COOKIE = "writing_oauth_verifier";
@@ -15,6 +19,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   const staging = new NextResponse();
   const auth = createAuthActions({
+    ...getInsforgeAuthConfig(),
+    ...authCookieSettings,
     requestCookies: request.cookies,
     responseCookies: staging.cookies,
   });

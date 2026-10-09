@@ -1,3 +1,4 @@
+import { fetchWithSessionRefresh } from "@/lib/auth/client-fetch";
 import type { WorkspaceSnapshot } from "@/lib/domain/types";
 import type { WorkspaceRepository } from "./repository";
 
@@ -15,7 +16,7 @@ async function parseJson<T>(response: Response): Promise<T> {
 
 export class ApiWorkspaceRepository implements WorkspaceRepository {
   async load(): Promise<WorkspaceSnapshot> {
-    const response = await fetch("/api/workspace", {
+    const response = await fetchWithSessionRefresh("/api/workspace", {
       cache: "no-store",
       credentials: "include",
     });
@@ -23,7 +24,7 @@ export class ApiWorkspaceRepository implements WorkspaceRepository {
   }
 
   async persist(snapshot: WorkspaceSnapshot): Promise<void> {
-    const response = await fetch("/api/workspace", {
+    const response = await fetchWithSessionRefresh("/api/workspace", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

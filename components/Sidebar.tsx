@@ -1,5 +1,8 @@
 "use client";
 
+import { notionBtnPrimary, notionMenuItemDanger, notionMenuItem, notionIconBtn, notionMenu, notionBtn, scrollbarCustom } from "@/lib/ui/notion";
+
+
 import { useEffect, useRef, useState } from "react";
 import {
   ChevronRight,
@@ -65,7 +68,7 @@ function DocActionsMenu({
   return (
     <div
       ref={ref}
-      className="notion-menu absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[140px]"
+      className={`${notionMenu} absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[140px]`}
       role="menu"
     >
       <button
@@ -75,7 +78,7 @@ function DocActionsMenu({
           onDelete();
           onClose();
         }}
-        className="notion-menu-item notion-menu-item-danger"
+        className={notionMenuItemDanger}
       >
         Delete
       </button>
@@ -185,7 +188,7 @@ function DocRow({
                 onClick={() => setRenaming(true)}
                 title="Rename"
                 aria-label={`Rename ${node.title}`}
-                className="notion-icon-btn"
+                className={notionIconBtn}
               >
                 <Pencil size={14} strokeWidth={1.75} />
               </button>
@@ -194,7 +197,7 @@ function DocRow({
                 onClick={() => setMenuOpen((open) => !open)}
                 title="More options"
                 aria-label={`More options for ${node.title}`}
-                className="notion-icon-btn"
+                className={notionIconBtn}
               >
                 <MoreHorizontal size={14} strokeWidth={1.75} />
               </button>
@@ -347,7 +350,7 @@ function FolderRow({
                 onClick={() => setRenaming(true)}
                 title="Rename"
                 aria-label={`Rename ${node.name}`}
-                className="notion-icon-btn"
+                className={notionIconBtn}
               >
                 <Pencil size={14} strokeWidth={1.75} />
               </button>
@@ -356,19 +359,19 @@ function FolderRow({
                 onClick={() => setMenuOpen((open) => !open)}
                 title="More options"
                 aria-label={`More options for ${node.name}`}
-                className="notion-icon-btn"
+                className={notionIconBtn}
               >
                 <MoreHorizontal size={14} strokeWidth={1.75} />
               </button>
               {menuOpen ? (
-                <div className="notion-menu absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[150px]">
+                <div className={`${notionMenu} absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[150px]`}>
                   <button
                     type="button"
                     onClick={() => {
                       onCreateDocument(node.folderId);
                       setMenuOpen(false);
                     }}
-                    className="notion-menu-item"
+                    className={notionMenuItem}
                   >
                     New document
                   </button>
@@ -378,7 +381,7 @@ function FolderRow({
                       confirmDelete();
                       setMenuOpen(false);
                     }}
-                    className="notion-menu-item notion-menu-item-danger"
+                    className={notionMenuItemDanger}
                   >
                     Delete
                   </button>
@@ -527,22 +530,22 @@ export function Sidebar({
     <aside
       className={`flex h-full shrink-0 flex-col bg-[var(--color-white-2)] transition-[width,opacity] duration-[var(--duration-duration-7)] ease-[var(--easing-ease-out)] ${
         open
-          ? "w-[280px] opacity-100 shadow-[var(--shadow-lg)]"
+          ? "w-[260px] opacity-100 shadow-[var(--shadow-lg)]"
           : "w-0 overflow-hidden opacity-0"
       }`}
       aria-hidden={!open}
     >
-      <div className="flex w-[280px] items-center justify-between gap-2 px-3 py-3">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <FileText size={16} strokeWidth={1.75} className="text-[var(--color-dark-gray)]" />
-          <p className="text-lg font-medium text-gray-700">Documents</p>
+      <div className="flex w-[260px] items-center justify-between gap-2 px-3 py-3">
+        <div className="flex items-center gap-1 min-w-0">
+          <FileText size={14} strokeWidth={1.75} className="text-[var(--color-dark-gray)]" />
+          <p className="text-md font-medium text-gray-700">Documents</p>
         </div>
         <div className="relative shrink-0" ref={newMenuRef}>
           <button
             type="button"
             onClick={() => setNewMenuOpen((open) => !open)}
-            className="notion-btn notion-btn-primary inline-flex items-center gap-1"
-            aria-haspopup="menu"
+            className={`${notionBtnPrimary} inline-flex items-center gap-1`}
+            aria-haspopup="menu" 
             aria-expanded={newMenuOpen}
           >
             <Plus size={14} strokeWidth={1.75} className="text-white" />
@@ -550,7 +553,7 @@ export function Sidebar({
           </button>
           {newMenuOpen ? (
             <div
-              className="notion-menu absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[150px]"
+              className={`${notionMenu} absolute right-0 top-full z-[var(--z-14)] mt-1 min-w-[150px]`}
               role="menu"
             >
               <button
@@ -560,7 +563,7 @@ export function Sidebar({
                   handleCreateFolder();
                   setNewMenuOpen(false);
                 }}
-                className="notion-menu-item"
+                className={notionMenuItem}
               >
                 New Folder
               </button>
@@ -571,7 +574,7 @@ export function Sidebar({
                   onCreateDocument(null);
                   setNewMenuOpen(false);
                 }}
-                className="notion-menu-item"
+                className={notionMenuItem}
               >
                 New Document
               </button>
@@ -580,7 +583,7 @@ export function Sidebar({
         </div>
       </div>
 
-      <div className="scrollbar-custom min-h-0 w-[280px] flex-1 overflow-y-auto px-2 pb-4 border-t border-gray-200 mt-1 pt-4">
+      <div className={`${scrollbarCustom} min-h-0 w-[260px] flex-1 overflow-y-auto px-2 pb-4 border-t border-gray-200 mt-1 pt-4`}>
         {!hydrated ? (
           <p className="px-2 py-2 text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">Loading…</p>
         ) : isEmpty ? (

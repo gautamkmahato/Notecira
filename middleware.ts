@@ -1,8 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   getAccessTokenCookieName,
+  getRefreshTokenCookieName,
   updateSession,
 } from "@insforge/sdk/ssr/middleware";
+import {
+  AUTH_REFRESH_LEEWAY_SECONDS,
+  authCookieSettings,
+  getInsforgeAuthConfig,
+} from "@/lib/insforge/auth-session";
 
 const PUBLIC_PREFIXES = ["/sign-in", "/api/auth", "/share", "/api/share"];
 
@@ -14,6 +20,13 @@ function isPublicPath(pathname: string): boolean {
 
 function hasAuthToken(request: NextRequest): boolean {
   if (request.cookies.get(getAccessTokenCookieName())?.value) return true;
+  if (
+    request.cookies.get(
+      getRefreshTokenCookieName(authCookieSettings.names),
+    )?.value
+  ) {
+    return true;
+  }
   const header = request.headers.get("authorization");
   return header?.toLowerCase().startsWith("bearer ") ?? false;
 }
@@ -23,8 +36,11 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next({ request });
 
   await updateSession({
+    ...getInsforgeAuthConfig(),
+    ...authCookieSettings,
     requestCookies: request.cookies,
     responseCookies: response.cookies,
+    refreshLeewaySeconds: AUTH_REFRESH_LEEWAY_SECONDS,
   });
 
   if (isPublicPath(pathname)) {

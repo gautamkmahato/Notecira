@@ -3,17 +3,22 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LogOut, User } from "lucide-react";
+import { fetchWithSessionRefresh } from "@/lib/auth/client-fetch";
 import {
   userInitial,
   type SessionUser,
 } from "@/lib/auth/session-user";
 
-export function UserMenu() {
+type UserMenuProps = {
+  placement?: "topbar" | "rail";
+};
+
+export function UserMenu({ placement = "topbar" }: UserMenuProps) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    void fetch("/api/auth/session", { credentials: "include" })
+    void fetchWithSessionRefresh("/api/auth/session", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.user) setUser(data.user as SessionUser);
@@ -22,6 +27,11 @@ export function UserMenu() {
   }, []);
 
   const initial = user ? userInitial(user) : "?";
+
+  const menuPositionClass =
+    placement === "rail"
+      ? "left-full bottom-0 ml-2"
+      : "right-0 top-full mt-2";
 
   return (
     <div className="relative">
@@ -53,7 +63,9 @@ export function UserMenu() {
             aria-label="Close menu"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 top-full z-[var(--z-14)] mt-2 w-48 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-light-gray-2)] bg-[var(--color-white)] py-1 shadow-[var(--shadow-md)]">
+          <div
+            className={`absolute z-[var(--z-14)] w-48 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-light-gray-2)] bg-[var(--color-white)] py-1 shadow-[var(--shadow-md)] ${menuPositionClass}`}
+          >
             <Link
               href="/profile"
               onClick={() => setOpen(false)}

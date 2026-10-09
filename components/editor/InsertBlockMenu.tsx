@@ -1,5 +1,8 @@
 "use client";
 
+import { notionMenuItem, notionMenu, notionBtn } from "@/lib/ui/notion";
+
+
 import { useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import type { BlockType } from "@/lib/domain/types";
@@ -31,13 +34,13 @@ export function InsertBlockMenu({ onInsert }: InsertBlockMenuProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="notion-btn gap-1 text-[var(--color-mid-gray)]"
+        className={`${notionBtn} gap-1 text-[var(--color-mid-gray)]`}
       >
         <Plus size={14} strokeWidth={1.75} />
         Add block
       </button>
       {open ? (
-        <div className="notion-menu absolute bottom-full left-0 z-[var(--z-14)] mb-1 max-h-64 w-52 overflow-y-auto">
+        <div className={`${notionMenu} absolute bottom-full left-0 z-[var(--z-14)] mb-1 max-h-64 w-52 overflow-y-auto`}>
           {INSERTABLE_BLOCK_TYPES.map((type) => (
             <button
               key={type}
@@ -46,7 +49,7 @@ export function InsertBlockMenu({ onInsert }: InsertBlockMenuProps) {
                 onInsert(type);
                 setOpen(false);
               }}
-              className="notion-menu-item"
+              className={notionMenuItem}
             >
               {BLOCK_TYPE_LABELS[type]}
             </button>

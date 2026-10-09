@@ -1,5 +1,8 @@
 "use client";
 
+import { canvasScrollBtn } from "@/lib/ui/notion";
+
+
 import {
   useCallback,
   useEffect,
@@ -98,7 +101,7 @@ export function CanvasScrollControls({
         type="button"
         onClick={() => scrollByColumn(-1)}
         disabled={!canScrollLeft}
-        className="canvas-scroll-btn absolute left-4 top-1/2 z-[var(--z-5)] -translate-y-1/2"
+        className={`${canvasScrollBtn} absolute left-4 top-1/2 z-[var(--z-5)] -translate-y-1/2`}
         aria-label="Scroll left one document"
       >
         <ChevronLeft size={20} strokeWidth={2} />
@@ -108,7 +111,7 @@ export function CanvasScrollControls({
         type="button"
         onClick={() => scrollByColumn(1)}
         disabled={!canScrollRight}
-        className="canvas-scroll-btn absolute right-4 top-1/2 z-[var(--z-5)] -translate-y-1/2"
+        className={`${canvasScrollBtn} absolute right-4 top-1/2 z-[var(--z-5)] -translate-y-1/2`}
         aria-label="Scroll right one document"
       >
         <ChevronRight size={20} strokeWidth={2} />

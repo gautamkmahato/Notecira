@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAuthActions } from "@insforge/sdk/ssr";
 import { getAppOrigin } from "@/lib/insforge/env";
+import {
+  authCookieSettings,
+  getInsforgeAuthConfig,
+} from "@/lib/insforge/auth-session";
 
 const VERIFIER_COOKIE = "writing_oauth_verifier";
 
@@ -19,6 +23,8 @@ export async function GET(request: NextRequest) {
 
   const response = NextResponse.redirect(`${origin}/documents`);
   const auth = createAuthActions({
+    ...getInsforgeAuthConfig(),
+    ...authCookieSettings,
     requestCookies: request.cookies,
     responseCookies: response.cookies,
   });

@@ -1,5 +1,8 @@
 "use client";
 
+import { notionMenuItem, notionMenu, scrollbarCustom } from "@/lib/ui/notion";
+
+
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { BlockType } from "@/lib/domain/types";
 import {
@@ -104,7 +107,7 @@ export function SlashCommandMenu({
     return (
       <div
         ref={ref}
-        className={`notion-menu absolute left-8 z-[var(--z-14)] w-56 px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-mid-gray)] ${positionClass}`}
+        className={`${notionMenu} absolute left-8 z-[var(--z-14)] w-56 px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-mid-gray)] ${positionClass}`}
         style={{ maxHeight: placement.maxHeight }}
       >
         No matching blocks
@@ -115,7 +118,7 @@ export function SlashCommandMenu({
   return (
     <div
       ref={ref}
-      className={`notion-menu scrollbar-custom absolute left-8 z-[var(--z-14)] w-56 overflow-y-auto ${positionClass}`}
+      className={`${notionMenu} ${scrollbarCustom} absolute left-8 z-[var(--z-14)] w-56 overflow-y-auto ${positionClass}`}
       style={{ maxHeight: placement.maxHeight }}
       role="listbox"
       aria-label="Insert block"
@@ -130,7 +133,7 @@ export function SlashCommandMenu({
           role="option"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onSelect(type)}
-          className="notion-menu-item"
+          className={notionMenuItem}
         >
           {BLOCK_TYPE_LABELS[type]}
         </button>

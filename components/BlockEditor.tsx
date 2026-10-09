@@ -11,7 +11,6 @@ type BlockEditorProps = {
   docId: string;
   columnIndex: number;
   columnCount: number;
-  contentPad: string;
   editable: boolean;
   openLinkedDocId?: string;
   onOpenLinked: (columnIndex: number, docId: string) => void;
@@ -21,7 +20,6 @@ export function BlockEditor({
   docId,
   columnIndex,
   columnCount,
-  contentPad,
   editable,
   openLinkedDocId,
   onOpenLinked,
@@ -145,11 +143,12 @@ export function BlockEditor({
   }, [docId, activeSelection, editable]);
 
   const compactGutter = columnCount > 1;
+  const hasCanvasBlock = blocks.some((block) => block.type === "canvas");
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex w-full flex-col">
       <div
-        className={`scrollbar-custom block-editor-blocks flex min-h-0 flex-1 flex-col gap-0 overflow-x-visible overflow-y-auto py-3 ${contentPad}`}
+        className="block-editor-blocks flex w-full flex-col gap-0 overflow-x-visible overflow-y-visible pb-3"
       >
         {blocks.map((block) => {
           const isActiveInPath = Boolean(
@@ -177,11 +176,16 @@ export function BlockEditor({
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               onDragEnd={handleDragEnd}
+              hideInsertBelow={hasCanvasBlock}
+              canvasOnlyGutter={
+                hasCanvasBlock && block.type === "canvas"
+              }
+              showGutter={!hasCanvasBlock || block.type === "canvas"}
             />
           );
         })}
 
-        {editable ? (
+        {editable && !hasCanvasBlock ? (
           <InsertBlockMenu onInsert={(type) => handleInsert(type)} />
         ) : null}
       </div>

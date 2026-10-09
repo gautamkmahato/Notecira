@@ -1,5 +1,8 @@
 "use client";
 
+import { notionMenuItem, notionMenu, scrollbarCustom } from "@/lib/ui/notion";
+
+
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { Block } from "@/lib/domain/types";
@@ -101,7 +104,7 @@ export function TableBlock({ block, editable = true, onSelect }: TableBlockProps
   };
 
   return (
-    <div className="scrollbar-custom overflow-x-auto" onFocus={onSelect}>
+    <div className={`${scrollbarCustom} overflow-x-auto`} onFocus={onSelect}>
       <table className="w-full border-collapse text-sm">
         <tbody>
           {table.cells.map((row, r) => (
@@ -131,7 +134,7 @@ export function TableBlock({ block, editable = true, onSelect }: TableBlockProps
                           <ChevronDown size={12} strokeWidth={2} />
                         </button>
                         {menuOpen ? (
-                          <div className="notion-menu absolute left-1/2 top-full z-[var(--z-14)] mt-1 w-48 -translate-x-1/2 py-1">
+                          <div className={`${notionMenu} absolute left-1/2 top-full z-[var(--z-14)] mt-1 w-48 -translate-x-1/2 py-1`}>
                             {MENU_ITEMS.map((item) => (
                               <button
                                 key={item.id}
@@ -139,7 +142,7 @@ export function TableBlock({ block, editable = true, onSelect }: TableBlockProps
                                 disabled={isMenuDisabled(item.id)}
                                 onMouseDown={(e) => e.preventDefault()}
                                 onClick={() => handleMenuAction(item.id)}
-                                className={`notion-menu-item disabled:opacity-40 ${
+                                className={`${notionMenuItem} disabled:opacity-40 ${
                                   "danger" in item && item.danger
                                     ? "text-[var(--notion-danger)] hover:bg-[var(--notion-danger-bg)]"
                                     : ""

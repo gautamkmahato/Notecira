@@ -1,5 +1,8 @@
 "use client";
 
+import { headingSerif } from "@/lib/ui/notion";
+
+
 import type { Block } from "@/lib/domain/types";
 import { RichTextBlock } from "./RichTextBlock";
 import { TableBlock } from "./TableBlock";
@@ -8,6 +11,7 @@ import { ImageBlock } from "./ImageBlock";
 import { VideoBlock } from "./VideoBlock";
 import { DocumentBlock } from "@/components/document-block/DocumentBlock";
 import { MarkdownBlock } from "@/components/markdown-block/MarkdownBlock";
+import { CanvasBlock } from "@/components/canvas-block/CanvasBlock";
 
 type BlockBodyProps = {
   block: Block;
@@ -49,7 +53,7 @@ export function BlockBody({
         <RichTextBlock
           {...textProps}
           placeholder="Heading 1"
-          className="font-serif text-3xl font-semibold tracking-tight"
+          className={`${headingSerif} text-3xl font-semibold tracking-tight`}
         />
       );
     case "heading_2":
@@ -57,7 +61,7 @@ export function BlockBody({
         <RichTextBlock
           {...textProps}
           placeholder="Heading 2"
-          className="font-serif text-2xl font-semibold tracking-tight"
+          className={`${headingSerif} text-2xl font-semibold tracking-tight`}
         />
       );
     case "heading_3":
@@ -123,7 +127,7 @@ export function BlockBody({
               className="h-80 w-full rounded-[var(--radius-xl)] bg-[var(--color-white)] shadow-[var(--shadow-sm)]"
             />
           ) : (
-            <div className="rounded-[var(--radius-xl)] bg-[var(--color-white-2)] px-3 py-8 text-center text-[var(--font-size-sm)] text-[var(--color-mid-gray)] shadow-[var(--shadow-sm)]">
+            <div className="rounded-[var(--radius-xl)] bg-[var(--color-white)] px-3 py-8 text-center text-[var(--font-size-sm)] text-[var(--color-mid-gray)] shadow-[var(--shadow-sm)]">
               Add a PDF URL in the toolbar
             </div>
           )}
@@ -143,6 +147,15 @@ export function BlockBody({
       return <DocumentBlock {...textProps} />;
     case "markdown":
       return <MarkdownBlock {...textProps} />;
+    case "canvas":
+      return (
+        <CanvasBlock
+          block={block}
+          isSelected={isSelected}
+          editable={editable}
+          onFocused={onSelect}
+        />
+      );
     case "paragraph":
     default:
       return <RichTextBlock {...textProps} />;

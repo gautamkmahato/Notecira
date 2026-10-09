@@ -27,4 +27,5 @@ export const toolbarRegistry: ToolbarRegistry = {
   pdf: pdfOptions,
   document: [],
   markdown: [],
+  canvas: [],
 };

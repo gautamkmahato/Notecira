@@ -22,7 +22,8 @@ export type BlockType =
   | "video"
   | "pdf"
   | "document"
-  | "markdown";
+  | "markdown"
+  | "canvas";
 
 /** Legacy block-level text attrs (inline marks in content HTML are preferred). */
 export type TextFormatAttrs = {
@@ -76,6 +77,14 @@ export type ListAttrs = {
   items?: string[];
 };
 
+import type { CanvasElement, CanvasMode } from "@/lib/canvas-block/types";
+
+/** Drawing canvas block (Excalidraw-style) attrs. */
+export type CanvasBlockAttrs = {
+  canvasMode?: CanvasMode;
+  canvasElements?: CanvasElement[];
+};
+
 /** Document block (Google Docs–style canvas) attrs. */
 export type DocumentBlockAttrs = {
   elements?: Array<{
@@ -99,7 +108,8 @@ export type BlockAttrs = TextFormatAttrs &
   Partial<MediaAttrs> &
   Partial<CodeAttrs> &
   Partial<ListAttrs> &
-  Partial<DocumentBlockAttrs>;
+  Partial<DocumentBlockAttrs> &
+  Partial<CanvasBlockAttrs>;
 
 /** Row shape for `folders` */
 export type Folder = {
@@ -229,6 +239,8 @@ export function defaultAttrsForType(type: BlockType): BlockAttrs {
       return {};
     case "markdown":
       return {};
+    case "canvas":
+      return { canvasMode: "infinite", canvasElements: [] };
     case "bulleted_list_item":
     case "numbered_list_item":
       return {};

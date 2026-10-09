@@ -9,7 +9,7 @@ type MarkdownPreviewProps = {
 };
 
 export function MarkdownPreview({ source }: MarkdownPreviewProps) {
-  const markdown = normalizeMarkdownSource(source);
+  const markdown = normalizeMarkdownSource(source).trimEnd();
   if (!markdown.trim()) return null;
 
   return (

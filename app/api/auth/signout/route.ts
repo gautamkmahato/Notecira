@@ -1,9 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAuthActions } from "@insforge/sdk/ssr";
+import {
+  authCookieSettings,
+  getInsforgeAuthConfig,
+} from "@/lib/insforge/auth-session";
 
 export async function POST(request: NextRequest) {
   const response = NextResponse.json({ ok: true });
   const auth = createAuthActions({
+    ...getInsforgeAuthConfig(),
+    ...authCookieSettings,
     requestCookies: request.cookies,
     responseCookies: response.cookies,
   });

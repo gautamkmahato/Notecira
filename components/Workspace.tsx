@@ -1,5 +1,6 @@
 "use client";
 
+import { notionBtnPrimary, scrollbarDocument, scrollbarCustom } from "@/lib/ui/notion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDocumentStore } from "@/lib/document-store";
 import { useActiveBlockSelection } from "@/lib/editor/active-block";
@@ -13,6 +14,7 @@ import { CanvasScrollControls } from "./CanvasScrollControls";
 import { FormatToolbar } from "./editor/FormatToolbar";
 import { DocumentFormatToolbar } from "./document-block/DocumentFormatToolbar";
 import { MarkdownFormatToolbar } from "./markdown-block/MarkdownFormatToolbar";
+import { CanvasFormatToolbar } from "./canvas-block/CanvasFormatToolbar";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -24,6 +26,7 @@ export function Workspace() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [focusDocId, setFocusDocId] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState<Record<number, number>>({});
+  const [isDocumentEditing, setIsDocumentEditing] = useState(false);
   const sidebarOpenRef = useRef(sidebarOpen);
   const sidebarPrefRef = useRef(true);
   const wasScrollLayoutRef = useRef(false);
@@ -170,6 +173,11 @@ export function Workspace() {
 
   const activeBlock = useActiveBlockSelection();
   const getBlock = useDocumentStore((s) => s.getBlock);
+  const activeDocIdForEffect = path[path.length - 1] ?? null;
+
+  useEffect(() => {
+    setIsDocumentEditing(false);
+  }, [activeDocIdForEffect]);
 
   if (!hydrated) {
     return (
@@ -179,7 +187,8 @@ export function Workspace() {
     );
   }
 
-  const activeDocId = path[path.length - 1] ?? null;
+  const activeDocId = activeDocIdForEffect;
+
   const toolbarBlockId =
     activeBlock?.docId && path.includes(activeBlock.docId)
       ? activeBlock.blockId
@@ -187,12 +196,26 @@ export function Workspace() {
   const toolbarBlock = toolbarBlockId ? getBlock(toolbarBlockId) : undefined;
   const isDocumentToolbar = toolbarBlock?.type === "document";
   const isMarkdownToolbar = toolbarBlock?.type === "markdown";
+  const isCanvasToolbar = toolbarBlock?.type === "canvas";
+  const centerToolbar =
+    path.length > 0 && toolbarBlockId
+      ? isDocumentToolbar
+        ? <DocumentFormatToolbar blockId={toolbarBlockId} embedded />
+        : isMarkdownToolbar
+          ? <MarkdownFormatToolbar blockId={toolbarBlockId} embedded />
+          : isCanvasToolbar
+            ? <CanvasFormatToolbar blockId={toolbarBlockId} embedded />
+            : <FormatToolbar blockId={toolbarBlockId} embedded />
+      : null;
   const layout = isFocused ? "focus" : scrollLayout ? "fixed" : "equal";
+  const documentScrollClass = `${scrollbarDocument} ${scrollbarCustom} h-full min-h-0 flex-1 overflow-y-auto overflow-x-auto bg-[var(--color-white)]`;
+  const documentContentClass =
+    "w-full min-h-[calc(100dvh-3.5rem)] pl-12 pr-4 pt-[2.1rem]";
   const canFocus = path.length > 1;
   const focusedIndex = focusDocId ? path.indexOf(focusDocId) : -1;
 
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className="flex h-full min-h-0 flex-1">
       <Sidebar
         open={sidebarOpen}
         activeDocId={activeDocId}
@@ -200,36 +223,28 @@ export function Workspace() {
         onCreateDocument={handleCreateDocument}
       />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-white)]">
         <Topbar
           path={path}
           activeDocId={activeDocId}
           sidebarOpen={sidebarOpen}
+          isDocumentEditing={isDocumentEditing}
+          onToggleDocumentEditing={() =>
+            setIsDocumentEditing((value) => !value)
+          }
           onToggleSidebar={toggleSidebar}
           onSelectPathIndex={selectPathIndex}
+          centerToolbar={centerToolbar}
         />
-
-        {path.length > 0 ? (
-          isDocumentToolbar ? (
-            <DocumentFormatToolbar blockId={toolbarBlockId} />
-          ) : isMarkdownToolbar ? (
-            <MarkdownFormatToolbar blockId={toolbarBlockId} />
-          ) : (
-            <FormatToolbar blockId={toolbarBlockId} />
-          )
-        ) : null}
 
         <div className="relative min-h-0 flex-1 overflow-hidden">
           <CanvasScrollControls
             scrollRef={scrollBoardRef}
             enabled={path.length > 1 && !isFocused}
           />
-          <div
-            ref={scrollBoardRef}
-            className="scrollbar-custom h-full overflow-x-auto overflow-y-hidden bg-[var(--color-white)]"
-          >
+          <div ref={scrollBoardRef} className={documentScrollClass}>
           {path.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+            <div className="flex min-h-full flex-col items-center justify-center gap-3 px-6 text-center">
               <p className="text-[var(--font-size-xl)] font-medium text-[var(--color-dark-gray-2)]">No documents yet</p>
               <p className="max-w-sm text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">
                 Create a document to start writing. Link any block to open a
@@ -238,13 +253,13 @@ export function Workspace() {
               <button
                 type="button"
                 onClick={() => handleCreateDocument(null)}
-                className="notion-btn notion-btn-primary"
+                className={notionBtnPrimary}
               >
                 Create document
               </button>
             </div>
           ) : isFocused && focusDocId ? (
-            <div className="flex gap-4 h-full w-full justify-center px-3 py-3 sm:px-5">
+            <div className={documentContentClass}>
               <DocumentColumn
                 key={`focus-${focusDocId}`}
                 docId={focusDocId}
@@ -254,6 +269,7 @@ export function Workspace() {
                 isLast
                 isFocused
                 canFocus={false}
+                editable={isDocumentEditing}
                 openLinkedDocId={
                   focusedIndex >= 0 ? path[focusedIndex + 1] : undefined
                 }
@@ -264,7 +280,7 @@ export function Workspace() {
               />
             </div>
           ) : scrollLayout ? (
-            <div className="flex gap-4 h-full min-h-0 w-max ml-4 mt-8">
+            <div className={`flex w-max gap-4 ${documentContentClass}`}>
               {path.map((docId, index) => (
                 <DocumentColumn
                   key={`${docId}-${index}`}
@@ -276,6 +292,7 @@ export function Workspace() {
                   isLast={index === path.length - 1}
                   isFocused={false}
                   canFocus={canFocus}
+                  editable={isDocumentEditing}
                   openLinkedDocId={path[index + 1]}
                   onOpenLinked={openLinked}
                   onCloseFrom={closeFrom}
@@ -284,17 +301,10 @@ export function Workspace() {
                   onResizeWidth={resizeColumn}
                 />
               ))}
-            </div> 
+            </div>
           ) : (
-            <div className="flex h-full w-full justify-center px-3 py-3 sm:px-5 mt-8">
-              <div
-                className="flex gap-4 h-full min-h-0"
-                style={{
-                  width:
-                    columnCount === 1 ? "min(820px, 100%)" : "min(100%, 1400px)",
-                  maxWidth: "100%",
-                }}
-              >
+            <div className={documentContentClass}>
+              <div className="flex w-full gap-4">
                 {path.map((docId, index) => (
                   <DocumentColumn
                     key={`${docId}-${index}`}
@@ -306,6 +316,7 @@ export function Workspace() {
                     isLast={index === path.length - 1}
                     isFocused={false}
                     canFocus={canFocus}
+                    editable={isDocumentEditing}
                     openLinkedDocId={path[index + 1]}
                     onOpenLinked={openLinked}
                     onCloseFrom={closeFrom}

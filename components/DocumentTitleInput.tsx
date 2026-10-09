@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { displayTitle, useDocumentStore } from "@/lib/document-store";
 
 type DocumentTitleInputProps = {
@@ -23,10 +23,18 @@ export function DocumentTitleInput({
   const { getDocument, renameDocument } = useDocumentStore();
   const document = getDocument(docId);
   const [draft, setDraft] = useState(document?.title ?? "");
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setDraft(document?.title ?? "");
   }, [document?.title, docId]);
+
+  useEffect(() => {
+    if (!readOnly && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [readOnly]);
 
   if (!document) return null;
 
@@ -56,6 +64,7 @@ export function DocumentTitleInput({
 
   return (
     <input
+      ref={inputRef}
       value={draft}
       autoFocus={autoFocus}
       readOnly={readOnly}

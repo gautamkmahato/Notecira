@@ -20,12 +20,14 @@ export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   pdf: "PDF",
   document: "Document",
   markdown: "Markdown",
+  canvas: "Canvas",
 };
 
 export const INSERTABLE_BLOCK_TYPES: BlockType[] = [
   "paragraph",
   "document",
   "markdown",
+  "canvas",
   "heading_1",
   "heading_2",
   "heading_3",
@@ -150,12 +152,21 @@ export function attrsForTypeChange(
     toType === "video" ||
     toType === "pdf" ||
     toType === "document" ||
-    toType === "markdown"
+    toType === "markdown" ||
+    toType === "canvas"
   ) {
     if (toType === "document") {
       return {
         content: from.content,
         attrs: defaultAttrsForType(toType),
+        linkedDocumentId: null,
+      };
+    }
+
+    if (toType === "canvas") {
+      return {
+        content: "",
+        attrs: defaultAttrsForType("canvas"),
         linkedDocumentId: null,
       };
     }

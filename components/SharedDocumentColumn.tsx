@@ -1,5 +1,8 @@
 "use client";
 
+import { notionIconBtn } from "@/lib/ui/notion";
+
+
 import type { CSSProperties } from "react";
 import { X } from "lucide-react";
 import type { SharedDocumentPayload } from "@/lib/domain/sharing";
@@ -75,7 +78,7 @@ export function SharedDocumentColumn({
             <button
               type="button"
               onClick={() => onCloseFrom(columnIndex)}
-              className="notion-icon-btn"
+              className={notionIconBtn}
               aria-label="Close this and deeper documents"
               title="Close"
             >

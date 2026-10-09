@@ -11,6 +11,7 @@ import { textFormatOptions } from "@/lib/editor/toolbar/options/text";
 
 type FormatToolbarProps = {
   blockId: string | null;
+  embedded?: boolean;
 };
 
 const EMPTY_BLOCK = {
@@ -25,7 +26,7 @@ const EMPTY_BLOCK = {
   updatedAt: "",
 };
 
-export function FormatToolbar({ blockId }: FormatToolbarProps) {
+export function FormatToolbar({ blockId, embedded = false }: FormatToolbarProps) {
   const getBlock = useDocumentStore((s) => s.getBlock);
   const updateBlockAttrs = useDocumentStore((s) => s.updateBlockAttrs);
   const updateBlockContent = useDocumentStore((s) => s.updateBlockContent);
@@ -51,24 +52,32 @@ export function FormatToolbar({ blockId }: FormatToolbarProps) {
     ? (type: typeof block.type) => updateBlockType(block.id, type)
     : () => {};
 
+  const inner = (
+    <div className="flex min-h-9 w-full min-w-0 items-center justify-center gap-1 overflow-visible rounded-[var(--radius-xl)] px-1.5 py-1.5">
+      {options.map((option) => (
+        <div key={option.id} className="flex shrink-0 items-center">
+          {option.render({
+            block: renderBlock,
+            patchAttrs,
+            setContent,
+            setType,
+            inline,
+          })}
+        </div>
+      ))}
+    </div>
+  );
+
+  if (embedded) {
+    return <div data-editor="rich-text">{inner}</div>;
+  }
+
   return (
     <div
       className="relative z-[var(--z-10)] flex min-h-12 shrink-0 items-center justify-center overflow-visible border-b border-[var(--color-light-gray-2)] bg-[var(--color-white)] px-3 sm:px-4"
       data-editor="rich-text"
     >
-      <div className="flex min-h-9 w-full min-w-0 items-center justify-center gap-1 overflow-visible rounded-[var(--radius-xl)] px-1.5 py-1.5">
-        {options.map((option) => (
-          <div key={option.id} className="flex shrink-0 items-center">
-            {option.render({
-              block: renderBlock,
-              patchAttrs,
-              setContent,
-              setType,
-              inline,
-            })}
-          </div>
-        ))}
-      </div>
+      {inner}
     </div>
   );
 }

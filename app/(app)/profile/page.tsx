@@ -6,6 +6,7 @@ import {
   userInitial,
   type SessionUser,
 } from "@/lib/auth/session-user";
+import { fetchWithSessionRefresh } from "@/lib/auth/client-fetch";
 
 function formatDate(value: string | null): string {
   if (!value) return "—";
@@ -31,7 +32,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void fetch("/api/auth/session", { credentials: "include" })
+    void fetchWithSessionRefresh("/api/auth/session", { credentials: "include" })
       .then(async (res) => {
         const body = (await res.json()) as { user?: SessionUser; error?: string };
         if (!res.ok) throw new Error(body.error ?? "Failed to load profile");

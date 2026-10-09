@@ -1,5 +1,8 @@
 "use client";
 
+import { notionBtn, scrollbarCustom } from "@/lib/ui/notion";
+
+
 import { displayTitle, useDocumentStore } from "@/lib/document-store";
 
 function formatDeletedAt(iso: string | null): string {
@@ -41,7 +44,7 @@ export function TrashView() {
         </p>
       </header>
 
-      <div className="scrollbar-custom min-h-0 flex-1 overflow-y-auto px-6 py-5">
+      <div className={`${scrollbarCustom} min-h-0 flex-1 overflow-y-auto px-6 py-5`}>
         {trashedDocuments.length === 0 ? (
           <p className="text-[var(--font-size-sm)] text-[var(--color-mid-gray)]">Trash is empty.</p>
         ) : (
@@ -67,7 +70,7 @@ export function TrashView() {
                   <button
                     type="button"
                     onClick={() => restoreDocument(document.id)}
-                    className="notion-btn"
+                    className={notionBtn}
                   >
                     Restore
                   </button>
@@ -82,7 +85,7 @@ export function TrashView() {
                         permanentlyDeleteDocument(document.id);
                       }
                     }}
-                    className="notion-btn text-[var(--notion-danger)] hover:bg-[var(--notion-danger-bg)]"
+                    className={`${notionBtn} text-[var(--notion-danger)] hover:bg-[var(--notion-danger-bg)]`}
                   >
                     Delete forever
                   </button>

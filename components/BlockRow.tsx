@@ -1,5 +1,8 @@
 "use client";
 
+import { notionMenuItemDanger, notionMenuItem, notionIconBtn, notionMenu } from "@/lib/ui/notion";
+
+
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { CornerDownRight, GripVertical, Plus } from "lucide-react";
 import { displayTitle, useDocumentStore } from "@/lib/document-store";
@@ -27,6 +30,9 @@ type BlockRowProps = {
   onDragOver: (blockId: string) => void;
   onDrop: (blockId: string) => void;
   onDragEnd: () => void;
+  hideInsertBelow?: boolean;
+  canvasOnlyGutter?: boolean;
+  showGutter?: boolean;
 };
 
 export function BlockRow({
@@ -48,6 +54,9 @@ export function BlockRow({
   onDragOver,
   onDrop,
   onDragEnd,
+  hideInsertBelow = false,
+  canvasOnlyGutter = false,
+  showGutter = true,
 }: BlockRowProps) {
   const getBlock = useDocumentStore((s) => s.getBlock);
   const getDocument = useDocumentStore((s) => s.getDocument);
@@ -156,8 +165,8 @@ export function BlockRow({
   };
 
   const contentClassName = `relative min-w-0 flex-1 rounded-[var(--radius-xl)] py-0.5 transition-colors duration-[var(--duration-fast)] ${
-    dragOver ? "shadow-[inset_0_4px_0_0_var(--color-blue)]" : ""
-  }`;
+    block.type === "canvas" ? "px-0" : "pl-4 pr-4"
+  } ${dragOver ? "shadow-[inset_0_4px_0_0_var(--color-blue)]" : ""}`;
 
   const gutterClassName = compactGutter
     ? "absolute right-full py-1.5 top-0.5 z-[var(--z-3)] mr-1 flex flex-col items-center gap-0.5 opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-100 group-focus-within:opacity-100"
@@ -179,23 +188,25 @@ export function BlockRow({
         onDrop(blockId);
       }}
     >
-      {editable ? (
+      {editable && showGutter ? (
         <div
           className={`${gutterClassName}${menuOpen ? " opacity-100" : ""}`}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <button
-            type="button"
-            title="Add block below"
-            aria-label="Add block below"
-            onClick={(e) => {
-              e.stopPropagation();
-              onInsertBelow(blockId);
-            }}
-            className="notion-icon-btn"
-          >
-            <Plus size={14} strokeWidth={1.75} />
-          </button>
+          {!hideInsertBelow && !canvasOnlyGutter ? (
+            <button
+              type="button"
+              title="Add block below"
+              aria-label="Add block below"
+              onClick={(e) => {
+                e.stopPropagation();
+                onInsertBelow(blockId);
+              }}
+              className={notionIconBtn}
+            >
+              <Plus size={14} strokeWidth={1.75} />
+            </button>
+          ) : null}
 
           <div className="relative" ref={menuRef}>
             <button
@@ -218,7 +229,7 @@ export function BlockRow({
                 }, 0);
               }}
               onClick={handleGripClick}
-              className="notion-icon-btn cursor-grab active:cursor-grabbing"
+              className={`${notionIconBtn} cursor-grab active:cursor-grabbing`}
             >
               <GripVertical size={14} strokeWidth={1.75} />
             </button>
@@ -226,7 +237,7 @@ export function BlockRow({
             {menuOpen ? (
               <div
                 ref={dropdownRef}
-                className={`notion-menu absolute z-[var(--z-14)] w-36 ${
+                className={`${notionMenu} absolute z-[var(--z-14)] w-36 ${
                   compactGutter
                     ? "left-full top-0 ml-1"
                     : menuOpensUp
@@ -235,20 +246,22 @@ export function BlockRow({
                 }`}
                 role="menu"
               >
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={handleDuplicate}
-                  className="notion-menu-item"
-                >
-                  Duplicate
-                </button>
-                {linkedDoc && editable ? (
+                {!canvasOnlyGutter ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleDuplicate}
+                    className={notionMenuItem}
+                  >
+                    Duplicate
+                  </button>
+                ) : null}
+                {linkedDoc && editable && !canvasOnlyGutter ? (
                   <button
                     type="button"
                     role="menuitem"
                     onClick={handleUnlink}
-                    className="notion-menu-item"
+                    className={notionMenuItem}
                   >
                     Unlink
                   </button>
@@ -257,7 +270,7 @@ export function BlockRow({
                   type="button"
                   role="menuitem"
                   onClick={handleDelete}
-                  className="notion-menu-item notion-menu-item-danger"
+                  className={notionMenuItemDanger}
                 >
                   Delete
                 </button>
@@ -294,7 +307,7 @@ export function BlockRow({
 
         {showLink ? (
           linkedDoc ? (
-            <div className="pointer-events-none absolute bottom-0.5 right-0 z-[var(--z-2)] max-w-full opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+            <div className="pointer-events-none absolute bottom-0.5 right-4 z-[var(--z-2)] max-w-[calc(100%-1rem)] opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
               <button
                 type="button"
                 onClick={handleOpen}
@@ -309,7 +322,7 @@ export function BlockRow({
               </button>
             </div>
           ) : editable ? (
-            <div className="pointer-events-none absolute bottom-0.5 right-0 z-[var(--z-2)] opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+            <div className="pointer-events-none absolute bottom-0.5 right-4 z-[var(--z-2)] opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
               <button
                 type="button"
                 onClick={handleLink}

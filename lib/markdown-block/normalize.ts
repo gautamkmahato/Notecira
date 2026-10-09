@@ -1,6 +1,6 @@
 /** Normalize pasted or stored markdown source for consistent rendering. */
 export function normalizeMarkdownSource(source: string): string {
-  return source.replace(/\r\n/g, "\n").trimEnd();
+  return source.replace(/\r\n/g, "\n").replace(/\u00a0/g, " ");
 }
 
 export function isEmptyMarkdown(source: string): boolean {

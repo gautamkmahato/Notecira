@@ -1,5 +1,8 @@
 "use client";
 
+import { scrollbarCustom } from "@/lib/ui/notion";
+
+
 import { useCallback, useEffect, useRef } from "react";
 import Editor from "react-simple-code-editor";
 import {
@@ -72,7 +75,7 @@ export function DocCode({
         }
       }}
     >
-      <div className="scrollbar-custom overflow-x-auto">
+      <div className={`${scrollbarCustom} overflow-x-auto`}>
         <Editor
           value={element.content}
           onValueChange={onValueChange}

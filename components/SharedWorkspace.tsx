@@ -1,5 +1,8 @@
 "use client";
 
+import { scrollbarCustom } from "@/lib/ui/notion";
+
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SharedDocumentPayload } from "@/lib/domain/sharing";
 import { displayTitle } from "@/lib/domain/helpers";
@@ -77,7 +80,7 @@ export function SharedWorkspace({ payload }: SharedWorkspaceProps) {
         </span>
 
         <nav
-          className="scrollbar-custom flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-[var(--font-size-lg)]"
+          className={`${scrollbarCustom} flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-[var(--font-size-lg)]`}
           aria-label="Breadcrumb"
         >
           {path.map((docId, index) => {
@@ -121,7 +124,7 @@ export function SharedWorkspace({ payload }: SharedWorkspaceProps) {
         />
         <div
           ref={scrollBoardRef}
-          className="scrollbar-custom h-full overflow-x-auto overflow-y-hidden bg-[var(--color-white)]"
+          className={`${scrollbarCustom} h-full overflow-x-auto overflow-y-hidden bg-[var(--color-white)]`}
         >
           {scrollLayout ? (
             <div className="flex h-full min-h-0 w-max gap-4 ml-4 mt-8">

@@ -5,6 +5,7 @@ import {
   getInsforgeAnonKey,
   getInsforgeUrl,
 } from "@/lib/insforge/env";
+import { authCookieSettings } from "@/lib/insforge/auth-session";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -42,5 +43,6 @@ export async function getInsforgeFromRequest(
     anonKey: getInsforgeAnonKey(),
     cookies: cookieStore,
     accessToken,
+    ...authCookieSettings,
   });
 }
