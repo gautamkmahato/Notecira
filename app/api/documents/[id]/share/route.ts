@@ -1,3 +1,4 @@
+import { invalidateDashboardCache } from "@/lib/cache/dashboard";
 import {
   getDocumentShare,
   updateDocumentShare,
@@ -48,6 +49,7 @@ export const PUT = withAuth(async (request, auth, context) => {
       body.visibility,
       allowedEmails,
     );
+    invalidateDashboardCache(auth.userId);
     return jsonOk(share);
   } catch (error) {
     if (error instanceof Error && error.message === "Document not found") {

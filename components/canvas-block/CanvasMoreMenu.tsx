@@ -3,6 +3,7 @@
 import { ImageIcon, MoreHorizontal, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActiveCanvas } from "@/lib/canvas-block/active-canvas";
+import { canvasToolActive } from "@/lib/ui/notion";
 
 type CanvasMoreMenuProps = {
   blockId: string | null;
@@ -45,7 +46,7 @@ export function CanvasMoreMenu({ blockId }: CanvasMoreMenuProps) {
         onClick={() => setOpen((value) => !value)}
         className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition disabled:opacity-40 ${
           open
-            ? "bg-[#ece9ff] text-[#6965db]"
+            ? canvasToolActive
             : "text-[var(--color-dark-gray)] hover:bg-[var(--notion-hover)]"
         }`}
       >

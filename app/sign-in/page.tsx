@@ -43,13 +43,13 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         <div className="flex flex-col gap-3">
           <Link
             href="/api/auth/oauth/google"
-            className="flex h-11 items-center justify-center gap-2 rounded-[var(--radius-xl)] border border-[var(--color-light-gray-2)] bg-[var(--color-white)] text-[var(--font-size-sm)] font-medium text-[var(--color-dark-gray-2)] shadow-[var(--shadow-sm)] transition hover:bg-[var(--notion-hover)]"
+            className="flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-white)] text-[var(--font-size-sm)] font-semibold text-[var(--color-dark-gray-2)] shadow-[var(--shadow-sm)] transition hover:bg-[#fafafa]"
           >
             Continue with Google
           </Link>
           <Link
             href="/api/auth/oauth/github"
-            className="flex h-11 items-center justify-center gap-2 rounded-[var(--radius-xl)] border border-[var(--color-light-gray-2)] bg-[var(--color-white)] text-[var(--font-size-sm)] font-medium text-[var(--color-dark-gray-2)] shadow-[var(--shadow-sm)] transition hover:bg-[var(--notion-hover)]"
+            className="flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-white)] text-[var(--font-size-sm)] font-semibold text-[var(--color-dark-gray-2)] shadow-[var(--shadow-sm)] transition hover:bg-[#fafafa]"
           >
             Continue with GitHub
           </Link>

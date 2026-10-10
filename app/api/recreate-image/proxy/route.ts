@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withAuth } from "@/lib/api/with-auth";
 
 function isAllowedImageHost(hostname: string) {
   return (
@@ -7,7 +8,7 @@ function isAllowedImageHost(hostname: string) {
   );
 }
 
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const rawUrl = new URL(req.url).searchParams.get("url");
 
   if (!rawUrl) {
@@ -51,7 +52,9 @@ export async function GET(req: Request) {
   return new NextResponse(buffer, {
     headers: {
       "Content-Type": contentType,
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "private, max-age=3600",
     },
   });
 }
+
+export const GET = withAuth(async (req) => handleGet(req));

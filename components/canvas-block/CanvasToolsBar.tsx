@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useActiveCanvas } from "@/lib/canvas-block/active-canvas";
 import type { CanvasTool } from "@/lib/canvas-block/types";
+import { canvasToolActive } from "@/lib/ui/notion";
 import { CanvasMoreMenu } from "./CanvasMoreMenu";
 
 const TOOLS: {
@@ -67,7 +68,7 @@ export function CanvasToolsBar({
           onClick={() => api?.setTool(tool)}
           className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition disabled:opacity-40 ${
             api?.tool === tool
-              ? "bg-[#ece9ff] text-[#6965db]"
+              ? canvasToolActive
               : "text-[var(--color-dark-gray)] hover:bg-[var(--notion-hover)]"
           }`}
         >

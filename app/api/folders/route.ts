@@ -1,3 +1,4 @@
+import { invalidateDashboardCache } from "@/lib/cache/dashboard";
 import { createFolder, listFolders } from "@/lib/data/workspace-db";
 import { withAuth } from "@/lib/api/with-auth";
 import { jsonError, jsonOk } from "@/lib/api/responses";
@@ -14,5 +15,6 @@ export const POST = withAuth(async (request, auth) => {
     return jsonError("Folder id and name are required", 400);
   }
   const created = await createFolder(auth.accessToken, auth.userId, body);
+  invalidateDashboardCache(auth.userId);
   return jsonOk(created, 201);
 });

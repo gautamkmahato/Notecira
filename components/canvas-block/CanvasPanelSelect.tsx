@@ -3,6 +3,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { useDismissOnOutsideClick } from "@/lib/editor/toolbar/hooks/use-dismiss-on-outside-click";
+import { canvasToolRing } from "@/lib/ui/notion";
 
 export type CanvasPanelSelectOption<T extends string = string> = {
   value: T;
@@ -44,8 +45,8 @@ export function CanvasPanelSelect<T extends string = string>({
         onClick={() => setOpen((current) => !current)}
         className={`flex h-8 w-full min-w-0 items-center justify-between gap-1 rounded-lg border bg-white px-2 text-[11px] text-[var(--color-dark-gray-2)] transition ${
           open
-            ? "border-[#6965db] ring-1 ring-[#ece9ff]"
-            : "border-[var(--color-light-gray-2)] hover:border-[var(--color-mid-gray-4)]"
+            ? canvasToolRing
+            : "border-[var(--color-border)] hover:border-[var(--color-mid-gray-4)]"
         }`}
       >
         <span className="truncate">{selected?.label ?? value}</span>
@@ -74,8 +75,8 @@ export function CanvasPanelSelect<T extends string = string>({
                   onChange(option.value);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center gap-2 px-2.5 py-2 text-left text-[12px] text-[var(--color-dark-gray-2)] transition hover:bg-[#f4f2ff] ${
-                  isSelected ? "bg-[#f4f2ff]" : ""
+                className={`flex w-full items-center gap-2 px-2.5 py-2 text-left text-[12px] text-[var(--color-dark-gray-2)] transition hover:bg-[var(--notion-hover)] ${
+                  isSelected ? "bg-[var(--notion-hover)]" : ""
                 }`}
               >
                 {option.icon ? (
@@ -85,7 +86,7 @@ export function CanvasPanelSelect<T extends string = string>({
                 ) : null}
                 <span className="min-w-0 flex-1 truncate">{option.label}</span>
                 {isSelected ? (
-                  <Check size={14} strokeWidth={2.25} className="shrink-0 text-[#6965db]" />
+                  <Check size={14} strokeWidth={2.25} className="shrink-0 text-[var(--color-dark-gray-2)]" />
                 ) : (
                   <span className="w-3.5 shrink-0" />
                 )}

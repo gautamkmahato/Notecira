@@ -1,6 +1,7 @@
 import type { AuthContext } from "@/lib/api/auth";
 import { AuthError, requireAuth } from "@/lib/api/auth";
 import { handleRouteError, jsonError } from "@/lib/api/responses";
+import { DocumentLimitError } from "@/lib/workspace/document-limit";
 
 type RouteContext = { params: Promise<Record<string, string>> };
 
@@ -17,6 +18,9 @@ export function withAuth(handler: AuthedHandler) {
       return await handler(request, auth, context);
     } catch (error) {
       if (error instanceof AuthError) {
+        return jsonError(error.message, error.status);
+      }
+      if (error instanceof DocumentLimitError) {
         return jsonError(error.message, error.status);
       }
       return handleRouteError(error);

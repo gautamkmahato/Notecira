@@ -27,10 +27,10 @@ export function MainNav() {
 
   return (
     <nav
-      className="flex h-full w-[72px] shrink-0 flex-col items-center bg-[var(--color-white)] py-4 shadow-[var(--shadow-lg)]"
+      className="flex h-full w-[72px] shrink-0 flex-col items-center border-r border-[var(--color-border)] bg-[var(--color-white)] py-4"
       aria-label="Main navigation"
     >
-      <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--color-dark-gray-2)] text-[var(--font-size-sm)] font-medium text-[var(--color-white)]">
+      <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-dark-gray-2)] text-[var(--font-size-sm)] font-semibold text-[var(--color-white)]">
         B
       </div>
 

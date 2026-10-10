@@ -164,7 +164,7 @@ function ColorSwatchRow({
         title={pickerTitle}
         className={`relative flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-md border bg-white ${
           customSelected
-            ? "border-[#6965db] ring-2 ring-[#ece9ff]"
+            ? "border-[var(--color-dark-gray-2)] ring-2 ring-[var(--color-blue-30)]"
             : "border-[var(--color-light-gray-2)]"
         }`}
       >
@@ -207,7 +207,7 @@ function PanelIconButton({
       onClick={onClick}
       className={`flex h-8 min-w-0 flex-1 items-center justify-center rounded-lg transition ${
         active
-          ? "bg-[#ece9ff] text-[var(--color-dark-gray-2)]"
+          ? "bg-[var(--notion-hover-strong)] text-[var(--color-dark-gray-2)]"
           : "bg-white text-[var(--color-dark-gray)] hover:bg-[var(--notion-hover)]"
       } ${className}`}
     >
@@ -274,7 +274,7 @@ function SwatchButton({
       onClick={onClick}
       className={`${dim} rounded-md border ${
         selected
-          ? "border-[#6965db] ring-2 ring-[#ece9ff]"
+          ? "border-[var(--color-dark-gray-2)] ring-2 ring-[var(--color-blue-30)]"
           : "border-[var(--color-light-gray-2)]"
       }`}
       style={

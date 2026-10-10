@@ -2,6 +2,7 @@
 
 import { notionBtnPrimary, scrollbarDocument, scrollbarCustom } from "@/lib/ui/notion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDocumentStore } from "@/lib/document-store";
 import { useActiveBlockSelection } from "@/lib/editor/active-block";
 import {
@@ -21,6 +22,9 @@ import { Topbar } from "./Topbar";
 export function Workspace() {
   const { snapshot, hydrated, createRootDocument, buildPathTo } =
     useDocumentStore();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const openedFromQueryRef = useRef<string | null>(null);
 
   const [path, setPath] = useState<string[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -131,6 +135,20 @@ export function Workspace() {
     },
     [buildPathTo, snapshot.documents],
   );
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const docId = searchParams.get("doc")?.trim();
+    if (!docId || openedFromQueryRef.current === docId) return;
+    const doc = snapshot.documents[docId];
+    if (!doc || doc.deletedAt) {
+      router.replace("/documents", { scroll: false });
+      return;
+    }
+    openedFromQueryRef.current = docId;
+    selectDocument(docId);
+    router.replace("/documents", { scroll: false });
+  }, [hydrated, searchParams, snapshot.documents, selectDocument, router]);
 
   const handleCreateDocument = useCallback(
     (folderId: string | null = null) => {

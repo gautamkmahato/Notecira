@@ -1,6 +1,6 @@
 "use client";
 
-import { notionIconBtn, notionBtn } from "@/lib/ui/notion";
+import { notionIconBtn, notionBtnSecondary } from "@/lib/ui/notion";
 
 
 import { useState, type ReactNode } from "react";
@@ -106,7 +106,7 @@ export function Topbar({
                       <button
                         type="button"
                         onClick={() => onSelectPathIndex(index)}
-                        className="truncate text-[var(--color-mid-gray)] transition-colors hover:text-[var(--color-blue)]"
+                        className="truncate text-[var(--color-mid-gray)] transition-colors hover:text-[var(--color-dark-gray-2)]"
                       >
                         {label}
                       </button>
@@ -152,7 +152,7 @@ export function Topbar({
               <button
                 type="button"
                 onClick={() => setShareOpen(true)}
-                className={`${notionBtn} inline-flex items-center gap-2`}
+                className={`${notionBtnSecondary} inline-flex items-center gap-2`}
                 title="Share document"
               >
                 <Share2 size={16} strokeWidth={1.75} />

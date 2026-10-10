@@ -1,3 +1,4 @@
+import { invalidateDashboardCache } from "@/lib/cache/dashboard";
 import { deleteFolder, updateFolder } from "@/lib/data/workspace-db";
 import { withAuth } from "@/lib/api/with-auth";
 import { jsonError, jsonOk } from "@/lib/api/responses";
@@ -15,6 +16,7 @@ export const PUT = withAuth(async (request, auth, context) => {
       id,
       patch,
     );
+    invalidateDashboardCache(auth.userId);
     return jsonOk(updated);
   } catch (error) {
     if (error instanceof Error && error.message === "Folder not found") {
@@ -27,5 +29,6 @@ export const PUT = withAuth(async (request, auth, context) => {
 export const DELETE = withAuth(async (_request, auth, context) => {
   const { id } = await (context as RouteContext).params;
   await deleteFolder(auth.accessToken, id);
+  invalidateDashboardCache(auth.userId);
   return jsonOk({ ok: true });
 });

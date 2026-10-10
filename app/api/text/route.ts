@@ -1,5 +1,6 @@
 import { fal } from "@fal-ai/client";
 import { NextResponse } from "next/server";
+import { withAuth } from "@/lib/api/with-auth";
 
 const LOG_PREFIX = "[api/text]";
 const MODEL_ID = "openai/gpt-image-2/edit";
@@ -26,7 +27,7 @@ type FalEditOutput = {
   }>;
 };
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   log("POST request received");
 
   try {
@@ -117,3 +118,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = withAuth(async (req) => handlePost(req));

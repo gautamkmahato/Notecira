@@ -1,7 +1,9 @@
+import { invalidateDashboardCache } from "@/lib/cache/dashboard";
 import { loadWorkspace, saveWorkspace } from "@/lib/data/workspace-db";
 import { withAuth } from "@/lib/api/with-auth";
 import { jsonError, jsonOk } from "@/lib/api/responses";
 import type { WorkspaceSnapshot } from "@/lib/domain/types";
+import { assertSnapshotWithinDocumentLimit } from "@/lib/workspace/document-limit";
 
 export const GET = withAuth(async (_request, auth) => {
   const snapshot = await loadWorkspace(auth.accessToken, auth.userId);
@@ -13,6 +15,8 @@ export const PUT = withAuth(async (request, auth) => {
   if (!body || body.version !== 5) {
     return jsonError("Invalid workspace snapshot", 400);
   }
+  assertSnapshotWithinDocumentLimit(body);
   await saveWorkspace(body, auth.userId);
+  invalidateDashboardCache(auth.userId);
   return jsonOk({ ok: true });
 });

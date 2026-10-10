@@ -1,3 +1,4 @@
+import { invalidateDashboardCache } from "@/lib/cache/dashboard";
 import {
   deleteDocument,
   getDocument,
@@ -26,6 +27,7 @@ export const PUT = withAuth(async (request, auth, context) => {
       id,
       patch,
     );
+    invalidateDashboardCache(auth.userId);
     return jsonOk(updated);
   } catch (error) {
     if (error instanceof Error && error.message === "Document not found") {
@@ -40,5 +42,6 @@ export const DELETE = withAuth(async (_request, auth, context) => {
   const existing = await getDocument(auth.accessToken, id);
   if (!existing) return jsonError("Document not found", 404);
   await deleteDocument(auth.accessToken, id);
+  invalidateDashboardCache(auth.userId);
   return jsonOk({ ok: true });
 });

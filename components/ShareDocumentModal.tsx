@@ -1,6 +1,11 @@
 "use client";
 
-import { notionBtnPrimary, notionIconBtn, notionBtn } from "@/lib/ui/notion";
+import {
+  notionBtnPrimary,
+  notionBtnSecondary,
+  notionIconBtn,
+  notionBtn,
+} from "@/lib/ui/notion";
 
 
 import { useEffect, useState } from "react";
@@ -291,7 +296,7 @@ export function ShareDocumentModal({
             ) : null}
 
             <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={onClose} className={notionBtn}>
+              <button type="button" onClick={onClose} className={notionBtnSecondary}>
                 Cancel
               </button>
               <button

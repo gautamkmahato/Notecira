@@ -2,7 +2,14 @@
 
 import { useEffect, type ReactNode } from "react";
 import { create } from "zustand";
+import { fetchWithSessionRefresh } from "@/lib/auth/client-fetch";
 import { apiWorkspaceRepository } from "@/lib/data/api-repository";
+import {
+  canAddDocuments,
+  DEFAULT_WORKSPACE_MAX_DOCUMENTS,
+  type WorkspaceDocumentLimit,
+} from "@/lib/constants/workspace-limits";
+import { countActiveDocumentsInSnapshot } from "@/lib/workspace/document-count";
 import {
   createEmptyWorkspace,
 } from "@/lib/data/local-repository";
@@ -42,8 +49,12 @@ type MergeResult = {
 type DocumentStoreState = {
   snapshot: WorkspaceSnapshot;
   hydrated: boolean;
+  /** Server-enforced cap; `null` = unlimited. */
+  documentLimit: WorkspaceDocumentLimit;
   sidebarForest: SidebarForest;
   trashedDocuments: TrashedDocumentItem[];
+
+  canCreateDocument: (additional?: number) => boolean;
 
   getDocument: (docId: string) => Document | undefined;
   getFolder: (folderId: string) => Folder | undefined;
@@ -144,6 +155,13 @@ const empty = createEmptyWorkspace();
 export const useDocumentStore = create<DocumentStoreState>((set, get) => ({
   ...withDerived(empty),
   hydrated: false,
+  documentLimit: DEFAULT_WORKSPACE_MAX_DOCUMENTS,
+
+  canCreateDocument: (additional = 1) => {
+    const { snapshot, documentLimit } = get();
+    const active = countActiveDocumentsInSnapshot(snapshot);
+    return canAddDocuments(active, additional, documentLimit);
+  },
 
   getDocument: (docId) => get().snapshot.documents[docId],
   getFolder: (folderId) => get().snapshot.folders[folderId],
@@ -157,11 +175,34 @@ export const useDocumentStore = create<DocumentStoreState>((set, get) => ({
 
   hydrate: async (repository = apiWorkspaceRepository) => {
     if (get().hydrated) return;
-    const loaded = await repository.load();
-    set({ ...withDerived(loaded), hydrated: true });
+    const [loaded, limitsResponse] = await Promise.all([
+      repository.load(),
+      fetchWithSessionRefresh("/api/workspace/limits", {
+        credentials: "include",
+      }).catch(() => null),
+    ]);
+
+    let documentLimit: WorkspaceDocumentLimit = DEFAULT_WORKSPACE_MAX_DOCUMENTS;
+    if (limitsResponse?.ok) {
+      const limits = (await limitsResponse.json()) as {
+        maxDocuments?: WorkspaceDocumentLimit;
+      };
+      if (limits.maxDocuments !== undefined) {
+        documentLimit = limits.maxDocuments;
+      }
+    }
+
+    set({
+      ...withDerived(loaded),
+      hydrated: true,
+      documentLimit,
+    });
   },
 
   createRootDocument: (title = "Untitled", folderId = null) => {
+    if (!get().canCreateDocument(1)) {
+      return "";
+    }
     const timestamp = nowIso();
     const documentId = createId();
     const blockId = createId();
@@ -815,6 +856,10 @@ export const useDocumentStore = create<DocumentStoreState>((set, get) => ({
 
     if (block.linkedDocumentId && prev.documents[block.linkedDocumentId]) {
       return block.linkedDocumentId;
+    }
+
+    if (!get().canCreateDocument(1)) {
+      return "";
     }
 
     const timestamp = nowIso();

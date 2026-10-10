@@ -538,7 +538,7 @@ export function Sidebar({
       <div className="flex w-[260px] items-center justify-between gap-2 px-3 py-3">
         <div className="flex items-center gap-1 min-w-0">
           <FileText size={14} strokeWidth={1.75} className="text-[var(--color-dark-gray)]" />
-          <p className="text-md font-medium text-gray-700">Documents</p>
+          <p className="text-md font-medium text-[var(--color-dark-gray-2)]">Documents</p>
         </div>
         <div className="relative shrink-0" ref={newMenuRef}>
           <button
@@ -548,8 +548,8 @@ export function Sidebar({
             aria-haspopup="menu" 
             aria-expanded={newMenuOpen}
           >
-            <Plus size={14} strokeWidth={1.75} className="text-white" />
-            <span className="text-[var(--font-size-2xs)] text-[var(--color-white)] pr-1">New</span>
+            <Plus size={14} className="text-white" />
+            <span className="text-[var(--font-size-2xs)] text-white font-medium pr-1">New</span>
           </button>
           {newMenuOpen ? (
             <div

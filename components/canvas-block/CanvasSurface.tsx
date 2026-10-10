@@ -1431,7 +1431,7 @@ function resizeHandles(element: CanvasElement) {
       width={size}
       height={size}
       fill="#fff"
-      stroke="#6965db"
+      stroke="#0a0a0a"
       strokeWidth={1.5}
       style={{ cursor: resizeHandleCursor(entry.handle) }}
     />
@@ -1452,7 +1452,7 @@ function rotateHandle(element: CanvasElement) {
         y1={center.y}
         x2={localHandle.x}
         y2={localHandle.y}
-        stroke="#6965db"
+        stroke="#0a0a0a"
         strokeWidth={1.5}
         pointerEvents="none"
       />
@@ -1461,7 +1461,7 @@ function rotateHandle(element: CanvasElement) {
         cy={localHandle.y}
         r={6}
         fill="#fff"
-        stroke="#6965db"
+        stroke="#0a0a0a"
         strokeWidth={1.5}
         style={{ cursor: "grab" }}
       />

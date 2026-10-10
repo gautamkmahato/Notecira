@@ -13,6 +13,7 @@ import {
 const PUBLIC_PREFIXES = ["/sign-in", "/api/auth", "/share", "/api/share"];
 
 function isPublicPath(pathname: string): boolean {
+  if (pathname === "/") return true;
   return PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
